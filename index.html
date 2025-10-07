@@ -2568,7 +2568,7 @@ const ComplianceTrackerApp = () => {
             <h3 className="font-semibold mb-3 flex items-center gap-2">
               <Bell className="w-4 h-4" /> Upcoming reminders
             </h3>
-            <ReminderListView data={upcomingReminders} />
+            <ReminderListView reminders={upcomingReminders} items={complianceItems} onRemove={removeReminder} />
           </div>
         </div>
       )}
