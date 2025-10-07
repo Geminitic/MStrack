@@ -7,7 +7,7 @@
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/lucide-react/dist/umd/lucide-react.js"></script>
+  <!-- lucide-react removed: using lightweight placeholders to avoid UMD/runtime issues in browser -->
   <style>
     body { margin: 0; font-family: system-ui, sans-serif; }
     /* You can add extra styles here */
@@ -40,62 +40,61 @@
 // Alias React hooks from global React (UMD)
 const { useState, useMemo, useEffect, useCallback, useRef } = React;
 
-// Safely grab lucide icons from the global UMD export (works with the CDN)
-const _lucide = window.lucide || window.Lucide || window.LucideReact || {};
-const {
-  Calendar,
-  Clock,
-  FileText,
-  Users,
-  AlertCircle,
-  Filter,
-  Search,
-  CheckCircle,
-  AlertTriangle,
-  Building2,
-  Gavel,
-  Scale,
-  Home,
-  ShieldCheck,
-  BookOpen,
-  ScrollText,
-  Landmark,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  X,
-  Download,
-  Upload,
-  Info,
-  BarChart2,
-  PieChart,
-  ListChecks,
-  ClipboardList,
-  Sparkles,
-  Layers,
-  Map,
-  MapPin,
-  Target,
-  Bell,
-  BellRing,
-  Mail,
-  Phone,
-  Globe,
-  Printer,
-  Share2,
-  Archive,
-  Edit,
-  Trash2,
-  Link,
-  Settings,
-  HelpCircle,
-  PauseCircle,
-  PlayCircle,
-  Square,
-  Save,
-  RefreshCcw,
-  CalendarDays
-} = _lucide;
+// Lightweight placeholder icons (avoid external runtime deps). Use emojis so visuals render without lucide.
+const makeIcon = (emoji) => (props) => React.createElement('span', Object.assign({ 'aria-hidden': true }, props), emoji);
+
+const Calendar = makeIcon('📅');
+const Clock = makeIcon('⏰');
+const FileText = makeIcon('📄');
+const Users = makeIcon('👥');
+const AlertCircle = makeIcon('⚠️');
+const Filter = makeIcon('⚙️');
+const Search = makeIcon('🔍');
+const CheckCircle = makeIcon('✅');
+const AlertTriangle = makeIcon('⚠️');
+const Building2 = makeIcon('🏢');
+const Gavel = makeIcon('⚖️');
+const Scale = makeIcon('⚖️');
+const Home = makeIcon('🏠');
+const ShieldCheck = makeIcon('🛡️');
+const BookOpen = makeIcon('📖');
+const ScrollText = makeIcon('📜');
+const Landmark = makeIcon('🏛️');
+const ChevronDown = makeIcon('▾');
+const ChevronRight = makeIcon('▸');
+const ChevronLeft = makeIcon('◂');
+const X = makeIcon('✖️');
+const Download = makeIcon('⬇️');
+const Upload = makeIcon('⬆️');
+const Info = makeIcon('ℹ️');
+const BarChart2 = makeIcon('📊');
+const PieChart = makeIcon('🥧');
+const ListChecks = makeIcon('☑️');
+const ClipboardList = makeIcon('📋');
+const Sparkles = makeIcon('✨');
+const Layers = makeIcon('🗂️');
+const MapIcon = makeIcon('🗺️');
+const MapPin = makeIcon('📍');
+const Target = makeIcon('🎯');
+const Bell = makeIcon('🔔');
+const BellRing = makeIcon('🔔');
+const Mail = makeIcon('✉️');
+const Phone = makeIcon('📞');
+const Globe = makeIcon('🌐');
+const Printer = makeIcon('🖨️');
+const Share2 = makeIcon('🔗');
+const Archive = makeIcon('🗄️');
+const Edit = makeIcon('✏️');
+const Trash2 = makeIcon('🗑️');
+const Link = makeIcon('🔗');
+const Settings = makeIcon('⚙️');
+const HelpCircle = makeIcon('❓');
+const PauseCircle = makeIcon('⏸️');
+const PlayCircle = makeIcon('▶️');
+const Square = makeIcon('◻️');
+const Save = makeIcon('💾');
+const RefreshCcw = makeIcon('🔄');
+const CalendarDays = makeIcon('🗓️');
 
 const ComplianceTrackerApp = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -2535,11 +2534,9 @@ const ComplianceTrackerApp = () => {
 };
 
 
-// Mount the app
-ReactDOM.createRoot(document.getElementById('root')).render(<ComplianceTrackerApp />);
-
-    // Mount the app
-    ReactDOM.createRoot(document.getElementById('root')).render(<ComplianceTrackerApp />);
+// Mount the app (single call)
+const _root = ReactDOM.createRoot(document.getElementById('root'));
+_root.render(<ComplianceTrackerApp />);
   </script>
 </body>
 </html>
