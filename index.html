@@ -11,6 +11,10 @@
   <!-- Tailwind Play CDN for utility CSS (suitable for static/demo sites). For production, precompile CSS. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- lucide-react removed: using lightweight placeholders to avoid UMD/runtime issues in browser -->
+  <!-- Nice heading font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&display=swap" rel="stylesheet">
   <style>
     body { margin: 0; font-family: system-ui, sans-serif; }
     /* You can add extra styles here */
@@ -18,7 +22,7 @@
     .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid #d1d5db; background: #f3f4f6; cursor: pointer; }
     input[type="text"], select, .select { padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; }
     .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
-    h1 { font-size: 1.6rem; margin: 0 0 0.25rem 0; }
+  h1 { font-size: 1.6rem; margin: 0 0 0.25rem 0; font-family: 'Merriweather', Georgia, serif; }
     .icon { display: inline-block; width: 1rem; height: 1rem; line-height: 1rem; text-align: center; }
     .controls { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; }
@@ -1767,9 +1771,9 @@ const ComplianceTrackerApp = () => {
     <div className={`${cardClasses} rounded-lg p-6 mb-6 border`}>
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold">MÃ©tis Settlements Comprehensive Compliance Tracker (2025)</h1>
+          <h1 className="text-3xl font-bold">Metis Settlements Compliance Tracker (2025)</h1>
           <p className="text-gray-500 mt-1">
-            Track deadlines, requirements, and obligations under the MÃ©tis Settlements Act and associated legislation
+            Track deadlines, requirements, and obligations under the Metis Settlements Act and associated legislation
           </p>
         </div>
         <div className="flex items-center gap-3">
