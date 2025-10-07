@@ -15,10 +15,8 @@
 <body>
   <div id="root"></div>
   <script type="text/babel">
-
-```jsx
 // ComplianceTrackerApp.jsx
-// Single-file comprehensive React web app for the MÃ©tis Settlements Act compliance visualization and tracking.
+// Single-file comprehensive React web app for the Métis Settlements Act compliance visualization and tracking.
 // - Interactive search, filters, high-priority toggle
 // - Dashboard summary, charts (SVG), timeline view, calendar view
 // - Detail modal with legal basis, actions, consequences, related sections
@@ -37,7 +35,7 @@
 //   return <ComplianceTrackerApp />;
 // }
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+// The rest of your JSX code follows...
 import {
   Calendar,
   Clock,
@@ -1126,7 +1124,7 @@ const ComplianceTrackerApp = () => {
       arr.splice(index, 1);
       return { ...prev, [id]: [...arr] };
     });
-    setAuditLog(prev => [...prev, { ts: new Date().toISOString(), action: 'ATTACHMENT_REMOVE', itemId: id, details: `index ${index}` }]);
+      setAuditLog(prev => [...prev, { ts: new Date().toISOString(), action: 'ATTACHMENT_REMOVE', itemId: id, details: `index ${index}` }]);
   };
 
   const toggleCategoryCollapse = (cat) => {
@@ -2531,8 +2529,9 @@ const ComplianceTrackerApp = () => {
   );
 };
 
-export default ComplianceTrackerApp;
-```
+
+// Mount the app
+ReactDOM.createRoot(document.getElementById('root')).render(<ComplianceTrackerApp />);
 
     // Mount the app
     ReactDOM.createRoot(document.getElementById('root')).render(<ComplianceTrackerApp />);
