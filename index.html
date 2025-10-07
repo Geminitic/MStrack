@@ -143,7 +143,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 1,
       category: 'Governance',
-      section: 'Â§12, Â§13; AR 145/93',
+      section: '§12, §13; AR 145/93',
       title: 'General Election Cycle',
       description: 'Hold regular council elections per Local Authorities Election Act adaptations',
       deadline: 'Every 4 years (October 2025, 2029, etc.)',
@@ -152,18 +152,18 @@ const ComplianceTrackerApp = () => {
       priority: 'Critical',
       responsible: 'Settlement Council (via Returning Officer)',
       action: 'Conduct general election with proper notices, nominations, voting procedures. Councillors serve until successors elected.',
-      consequences: 'Council mandate lapses. Ministerial intervention under Â§30-31 (Official Manager). Legal challenge under LAEA possible. Settlement cannot legally function.',
+      consequences: 'Council mandate lapses. Ministerial intervention under §30-31 (Official Manager). Legal challenge under LAEA possible. Settlement cannot legally function.',
       trigger: 'Fixed 4-year cycle',
       cyclicDate: 'First Monday in October',
-      relatedSections: ['Â§30-31']
+      relatedSections: ['§30-31']
     },
     {
       id: 2,
       category: 'Governance',
-      section: 'Â§8(1.1)-(1.2)',
+      section: '§8(1.1)-(1.2)',
       title: 'Council Size Resolution',
       description: 'Determine councillors (3-5) by resolution before election',
-      deadline: 'â‰¥6 months before election',
+      deadline: '≥6 months before election',
       frequency: 'Before each election',
       type: 'Procedural',
       priority: 'High',
@@ -175,7 +175,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 3,
       category: 'Governance',
-      section: 'Â§15-17; LAEA',
+      section: '§15-17; LAEA',
       title: 'Councillor Eligibility Enforcement',
       description: 'Verify candidate eligibility per LAEA adaptations',
       deadline: 'During nomination/election period',
@@ -183,14 +183,14 @@ const ComplianceTrackerApp = () => {
       type: 'Procedural',
       priority: 'Critical',
       responsible: 'Settlement Administrator (Returning Officer)',
-      action: 'Verify: settlement member status, no disqualifying debt (>$250 without agreement), no criminal convictions per Â§17(1)(b), not otherwise ineligible Â§17(1)(a).',
+      action: 'Verify: settlement member status, no disqualifying debt (>$250 without agreement), no criminal convictions per §17(1)(b), not otherwise ineligible §17(1)(a).',
       consequences: "Ineligible candidate election void. Election contestable in Court of King's Bench. Results may be overturned.",
-      relatedSections: ['Â§26-29']
+      relatedSections: ['§26-29']
     },
     {
       id: 4,
       category: 'Governance',
-      section: 'Â§21, Â§22; LAEA',
+      section: '§21, §22; LAEA',
       title: 'By-Elections for Vacancies',
       description: 'Fill vacant council seats if vacancy early in term',
       deadline: 'Within ~90 days (LAEA); if >180 days before next general election',
@@ -198,14 +198,14 @@ const ComplianceTrackerApp = () => {
       type: 'Election',
       priority: 'High',
       responsible: 'Settlement Council (Returning Officer)',
-      action: 'Hold by-election. If vacancy in final 180 days, defer to general election per Â§21(b).',
-      consequences: 'Council shorthanded. If quorum lost, Minister may appoint Official Manager Â§31.',
-      relatedSections: ['Â§30-31', 'Â§38']
+      action: 'Hold by-election. If vacancy in final 180 days, defer to general election per §21(b).',
+      consequences: 'Council shorthanded. If quorum lost, Minister may appoint Official Manager §31.',
+      relatedSections: ['§30-31', '§38']
     },
     {
       id: 5,
       category: 'Governance',
-      section: 'Â§32(1); Â§10',
+      section: '§32(1); §10',
       title: 'Organizational Meeting',
       description: 'Inaugural meeting post-election to swear in and select Chair',
       deadline: 'Within 14 days after election',
@@ -213,14 +213,14 @@ const ComplianceTrackerApp = () => {
       type: 'Meeting',
       priority: 'Critical',
       responsible: 'Settlement Council',
-      action: 'Administrator gives written notice. Hold meeting to: administer oaths Â§23, appoint Chair (unless direct-election bylaw â‰¥180 days pre-election), establish committees.',
+      action: 'Administrator gives written notice. Hold meeting to: administer oaths §23, appoint Chair (unless direct-election bylaw ≥180 days pre-election), establish committees.',
       consequences: 'Cannot legally transact business until organizational meeting and oaths completed.',
-      relatedSections: ['Â§23', 'Â§10(3)']
+      relatedSections: ['§23', '§10(3)']
     },
     {
       id: 6,
       category: 'Governance',
-      section: 'Â§5(1)-(2)',
+      section: '§5(1)-(2)',
       title: 'Annual General Meeting',
       description: 'Public meeting to report activities and finances',
       deadline: 'Within 180 days after fiscal year-end (by Sept 30 if March 31 FY)',
@@ -228,31 +228,31 @@ const ComplianceTrackerApp = () => {
       type: 'Meeting',
       priority: 'High',
       responsible: 'Settlement Council (Chair)',
-      action: 'Public notice per Â§233. Present: audited financials, 3-year business plan, discuss activities, allow member input.',
-      consequences: 'Transparency breach. Minister/member concerns. May trigger audits Â§160-162 or intervention Â§176.',
+      action: 'Public notice per §233. Present: audited financials, 3-year business plan, discuss activities, allow member input.',
+      consequences: 'Transparency breach. Minister/member concerns. May trigger audits §160-162 or intervention §176.',
       annualDate: 'September 30',
       financialYear: true,
-      relatedSections: ['Â§163', 'Â§156.1', 'Â§233']
+      relatedSections: ['§163', '§156.1', '§233']
     },
     {
       id: 7,
       category: 'Governance',
-      section: 'Â§6(1)-(4)',
+      section: '§6(1)-(4)',
       title: 'Special Membership Meeting',
-      description: 'Hold meeting when petitioned by â‰¥10% of members',
-      deadline: 'Within 30 days of valid petition; â‰¥7 days public notice',
+      description: 'Hold meeting when petitioned by ≥10% of members',
+      deadline: 'Within 30 days of valid petition; ≥7 days public notice',
       frequency: 'As petitioned',
       type: 'Meeting',
       priority: 'High',
       responsible: 'Settlement Chair',
-      action: 'Verify â‰¥10% signatures (per census). Give public notice (â‰¥7 days) with date, time, place, purpose. Hold within 30 days.',
-      consequences: 'Denies democratic rights. Ministerial scrutiny Â§171-176 or legal action possible.',
-      relatedSections: ['Â§233']
+      action: 'Verify ≥10% signatures (per census). Give public notice (≥7 days) with date, time, place, purpose. Hold within 30 days.',
+      consequences: 'Denies democratic rights. Ministerial scrutiny §171-176 or legal action possible.',
+      relatedSections: ['§233']
     },
     {
       id: 8,
       category: 'Governance',
-      section: 'Â§39, Â§39.1, Â§25',
+      section: '§39, §39.1, §25',
       title: 'Conflict of Interest Disclosure',
       description: 'Disclose financial interests and abstain from conflicted votes',
       deadline: 'At each meeting when interest arises; within 30 days of disqualification',
@@ -261,13 +261,13 @@ const ComplianceTrackerApp = () => {
       priority: 'Critical',
       responsible: 'Individual Councillors',
       action: 'Disclose financial interest in matters before council. Abstain from voting on resolutions. May deliberate but not vote on bylaws. Council enforces disqualification.',
-      consequences: 'Decisions void per Â§39.1. Disqualified refusing resignation: Court removal Â§26. Personal liability. Costs assigned.',
-      relatedSections: ['Â§26-29', 'Â§47.2']
+      consequences: 'Decisions void per §39.1. Disqualified refusing resignation: Court removal §26. Personal liability. Costs assigned.',
+      relatedSections: ['§26-29', '§47.2']
     },
     {
       id: 9,
       category: 'Governance',
-      section: 'Â§11.1',
+      section: '§11.1',
       title: 'Councillor Remuneration Bylaw',
       description: 'Set pay, benefits, expenses by bylaw',
       deadline: 'Upon compensation changes; periodic review',
@@ -275,16 +275,16 @@ const ComplianceTrackerApp = () => {
       type: 'Legislative',
       priority: 'Medium',
       responsible: 'Settlement Council',
-      action: "Bylaw sets: Chair remuneration, other councillors' pay (max 50% of Chair). Not subject to public vote Â§55.1.",
-      consequences: 'Payments without bylaw unauthorized Â§47.2. Minister can demand repayment. Audit flags.',
-      relatedSections: ['Â§47.2', 'Â§159.2', 'Â§55.1']
+      action: "Bylaw sets: Chair remuneration, other councillors' pay (max 50% of Chair). Not subject to public vote §55.1.",
+      consequences: 'Payments without bylaw unauthorized §47.2. Minister can demand repayment. Audit flags.',
+      relatedSections: ['§47.2', '§159.2', '§55.1']
     },
 
     // FINANCIAL MANAGEMENT
     {
       id: 10,
       category: 'Financial',
-      section: 'Â§156.1',
+      section: '§156.1',
       title: 'Three-Year Business Plan',
       description: 'Strategic plan for 3 fiscal years',
       deadline: 'By January 31 annually (for April 1 FY start)',
@@ -293,15 +293,15 @@ const ComplianceTrackerApp = () => {
       priority: 'High',
       responsible: 'Settlement Council',
       action: "Plan must include: mission/core business, goals/strategies/performance targets, controlled entities' purposes. Review and update annually.",
-      consequences: 'Budget cannot align with goals (Â§157 requires relation). Minister may cite in management review Â§171-176.',
+      consequences: 'Budget cannot align with goals (§157 requires relation). Minister may cite in management review §171-176.',
       annualDate: 'January 31',
       financialYear: true,
-      relatedSections: ['Â§157(1)(b.1)']
+      relatedSections: ['§157(1)(b.1)']
     },
     {
       id: 11,
       category: 'Financial',
-      section: 'Â§157',
+      section: '§157',
       title: 'Annual Budget Bylaw',
       description: 'Budget bylaw outlining revenues/expenditures',
       deadline: 'Before FY starts (by March 31 for April 1)',
@@ -309,16 +309,16 @@ const ComplianceTrackerApp = () => {
       type: 'Financial',
       priority: 'Critical',
       responsible: 'Settlement Council',
-      action: 'Budget: MSGC allocations, settlement revenues, relation to business plan, capital vs operations, deficit recovery amount. Not subject to public meeting Â§55.1.',
-      consequences: 'No spending authority without budget. Limited to $100k basic operations Â§142(1)(b.1). Persistent failure: Ministerial intervention Â§176.',
+      action: 'Budget: MSGC allocations, settlement revenues, relation to business plan, capital vs operations, deficit recovery amount. Not subject to public meeting §55.1.',
+      consequences: 'No spending authority without budget. Limited to $100k basic operations §142(1)(b.1). Persistent failure: Ministerial intervention §176.',
       annualDate: 'March 31',
       financialYear: true,
-      relatedSections: ['Â§158', 'Â§158.1', 'Â§55.1', 'Â§142(1)(b.1)']
+      relatedSections: ['§158', '§158.1', '§55.1', '§142(1)(b.1)']
     },
     {
       id: 12,
       category: 'Financial',
-      section: 'Â§158.1',
+      section: '§158.1',
       title: 'Deficit Elimination',
       description: 'Eliminate operating deficits within 3 years',
       deadline: '3 budget years after deficit',
@@ -326,14 +326,14 @@ const ComplianceTrackerApp = () => {
       type: 'Financial',
       priority: 'High',
       responsible: 'Settlement Council',
-      action: 'If operations exceed revenues, budget surpluses/reductions in next 3 years to cover. Show recovery in budgets Â§157(1)(c)(iii).',
-      consequences: 'Deficits beyond 3 years violate MSA. Joint Review Committee Â§246.1 oversight, comptroller Â§178 possible.',
-      relatedSections: ['Â§176-178', 'Â§246.1']
+      action: 'If operations exceed revenues, budget surpluses/reductions in next 3 years to cover. Show recovery in budgets §157(1)(c)(iii).',
+      consequences: 'Deficits beyond 3 years violate MSA. Joint Review Committee §246.1 oversight, comptroller §178 possible.',
+      relatedSections: ['§176-178', '§246.1']
     },
     {
       id: 13,
       category: 'Financial',
-      section: 'Â§159(1)',
+      section: '§159(1)',
       title: 'Expenditure Authorization',
       description: 'All payments properly authorized and documented',
       deadline: 'Every payment',
@@ -342,13 +342,13 @@ const ComplianceTrackerApp = () => {
       priority: 'Critical',
       responsible: 'Council & Administrator',
       action: 'Payment requires: budget/resolution authority, Chair+Administrator signatures, Administrator certification of funds, goods/services received.',
-      consequences: 'Unauthorized expenditures ultra vires. Personal liability Â§177. Minister can order restitution Â§176-177 or inspection Â§160-162.',
-      relatedSections: ['Â§177', 'Â§160-162']
+      consequences: 'Unauthorized expenditures ultra vires. Personal liability §177. Minister can order restitution §176-177 or inspection §160-162.',
+      relatedSections: ['§177', '§160-162']
     },
     {
       id: 14,
       category: 'Financial',
-      section: 'Â§163',
+      section: '§163',
       title: 'Audited Financial Statements',
       description: 'Annual audit of settlement fund',
       deadline: 'ASAP after FY end; typically June-August completion',
@@ -357,15 +357,15 @@ const ComplianceTrackerApp = () => {
       priority: 'Critical',
       responsible: 'Settlement Council',
       action: 'Appoint qualified auditor. Complete audit. Present at AGM (within 180 days of year-end).',
-      consequences: 'Late/missing audits violate MSA. Minister may withhold funds, delay transfers, require inspection Â§160. AGM presentation breach Â§5.',
+      consequences: 'Late/missing audits violate MSA. Minister may withhold funds, delay transfers, require inspection §160. AGM presentation breach §5.',
       annualDate: 'June-August',
       financialYear: true,
-      relatedSections: ['Â§5', 'Â§160']
+      relatedSections: ['§5', '§160']
     },
     {
       id: 15,
       category: 'Financial',
-      section: 'Â§159.1',
+      section: '§159.1',
       title: 'Standardized Financial Reports',
       description: 'MSGC-format financial reports',
       deadline: 'By September 30 for prior FY',
@@ -374,15 +374,15 @@ const ComplianceTrackerApp = () => {
       priority: 'High',
       responsible: 'Settlement Council',
       action: 'Prepare per MSGC Policy format. File with Minister and MSGC.',
-      consequences: 'Non-compliance noted. May trigger review Â§171. Persistent failure: Minister-ordered audits or public default reporting.',
+      consequences: 'Non-compliance noted. May trigger review §171. Persistent failure: Minister-ordered audits or public default reporting.',
       annualDate: 'September 30',
       financialYear: true,
-      relatedSections: ['Â§171-176']
+      relatedSections: ['§171-176']
     },
     {
       id: 16,
       category: 'Financial',
-      section: 'Â§159.2',
+      section: '§159.2',
       title: 'Councillor Expense Report',
       description: 'Public report of councillor compensation',
       deadline: 'By September 30 for prior FY',
@@ -393,14 +393,14 @@ const ComplianceTrackerApp = () => {
       action: "List each councillor's remuneration and expenses per GAAP. Make public at AGM or on request.",
       consequences: 'Transparency breach. Members/Minister can demand info. May be cited in review/audit.',
       annualDate: 'September 30',
-      relatedSections: ['Â§11.1', 'Â§44(1)(h)']
+      relatedSections: ['§11.1', '§44(1)(h)']
     },
 
     // BYLAWS & LEGISLATION
     {
       id: 17,
       category: 'Legislative',
-      section: 'Â§52',
+      section: '§52',
       title: 'Bylaw Three Readings',
       description: '3 distinct readings required for bylaws',
       deadline: 'Max 2 readings per meeting; all within 2 years',
@@ -409,28 +409,28 @@ const ComplianceTrackerApp = () => {
       priority: 'High',
       responsible: 'Settlement Council',
       action: 'Each reading requires vote of quorum. Written bylaw required for 2nd/3rd reading. Max 2 readings same meeting.',
-      consequences: 'Bylaw has no effect without proper readings. Previous readings cancelled if not completed within 2 years Â§53.',
-      relatedSections: ['Â§53']
+      consequences: 'Bylaw has no effect without proper readings. Previous readings cancelled if not completed within 2 years §53.',
+      relatedSections: ['§53']
     },
     {
       id: 18,
       category: 'Legislative',
-      section: 'Â§54-55',
+      section: '§54-55',
       title: 'Public Meeting for Bylaws',
       description: 'Public meeting between 2nd and 3rd reading',
-      deadline: 'â‰¥14 days public notice; meeting after 2nd, before 3rd reading',
+      deadline: '≥14 days public notice; meeting after 2nd, before 3rd reading',
       frequency: 'Per bylaw',
       type: 'Meeting',
       priority: 'High',
       responsible: 'Settlement Council',
       action: 'Hold public meeting. Quorum: 15 eligible members or bylaw-specified number. Majority approval needed.',
-      consequences: 'Bylaw defeated if majority vote against. Process invalid without proper public meeting. Exceptions: budget, remuneration, essential services Â§55.1.',
-      relatedSections: ['Â§55.1', 'Â§56']
+      consequences: 'Bylaw defeated if majority vote against. Process invalid without proper public meeting. Exceptions: budget, remuneration, essential services §55.1.',
+      relatedSections: ['§55.1', '§56']
     },
     {
       id: 19,
       category: 'Legislative',
-      section: 'Â§51.1',
+      section: '§51.1',
       title: 'Essential Services Bylaw',
       description: 'Bylaw for water, sewage, roads fees',
       deadline: 'Within 1 year of section force (2021 c12)',
@@ -440,29 +440,29 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Council',
       action: 'Adopt bylaw with fees for: water distribution, sewage/waste, road maintenance. Separate fees for each service. Fees must cover costs, not exceed.',
       consequences: 'Cannot legally charge for essential services without bylaw.',
-      relatedSections: ['Â§51', 'Â§55.1']
+      relatedSections: ['§51', '§55.1']
     },
     {
       id: 20,
       category: 'Legislative',
-      section: 'Â§44(1)',
+      section: '§44(1)',
       title: 'Document Posting Requirement',
       description: 'Post specified documents in settlement office',
-      deadline: 'â‰¥15 consecutive days (exceptions possible Â§44(2))',
+      deadline: '≥15 consecutive days (exceptions possible §44(2))',
       frequency: 'Per document',
       type: 'Documentation',
       priority: 'Medium',
       responsible: 'Settlement Administrator',
       action: 'Post: agreements, proposed bylaws (after 2nd reading), reports, audited financials, minutes, enacted bylaws, business plans, remuneration reports.',
-      consequences: 'Transparency failure. Decisions may be challenged. Remuneration bylaws/reports mandatory posting Â§44(2.1).',
-      relatedSections: ['Â§44(2)-(4)']
+      consequences: 'Transparency failure. Decisions may be challenged. Remuneration bylaws/reports mandatory posting §44(2.1).',
+      relatedSections: ['§44(2)-(4)']
     },
 
     // MEMBERSHIP MANAGEMENT
     {
       id: 21,
       category: 'Membership',
-      section: 'Â§77-79',
+      section: '§77-79',
       title: 'Membership Application Review',
       description: 'Process membership applications timely',
       deadline: 'Consider within 90 days of receipt; decide within 45 days of consideration',
@@ -470,44 +470,44 @@ const ComplianceTrackerApp = () => {
       type: 'Procedural',
       priority: 'High',
       responsible: 'Settlement Council',
-      action: 'Give applicant notice of meeting date. Provide opportunity for evidence/hearing. Decide: approve, defer, refuse, approve with probation (â‰¤2 years).',
-      consequences: 'Refusal/inaction appealable to MSAT within 45 days Â§83. MSAT can order admission. Approval appealable by members (with MSAT permission).',
-      relatedSections: ['Â§83-84']
+      action: 'Give applicant notice of meeting date. Provide opportunity for evidence/hearing. Decide: approve, defer, refuse, approve with probation (≤2 years).',
+      consequences: 'Refusal/inaction appealable to MSAT within 45 days §83. MSAT can order admission. Approval appealable by members (with MSAT permission).',
+      relatedSections: ['§83-84']
     },
     {
       id: 22,
       category: 'Membership',
-      section: 'Â§86',
+      section: '§86',
       title: 'Probationary Membership',
-      description: 'Manage probationary members (â‰¤2 year period)',
+      description: 'Manage probationary members (≤2 year period)',
       deadline: 'Termination before probation ends',
       frequency: 'Per probationer',
       type: 'Procedural',
       priority: 'Medium',
       responsible: 'Settlement Council',
       action: 'May terminate by resolution if: no accommodation, or not committed to peaceful living. Give notice and hearing opportunity before decision.',
-      consequences: 'After probation, permanent status (only bylaw removal Â§87). Improper termination appealable within 30 days to MSAT. Send resolution to member and Minister.',
-      relatedSections: ['Â§87-89']
+      consequences: 'After probation, permanent status (only bylaw removal §87). Improper termination appealable within 30 days to MSAT. Send resolution to member and Minister.',
+      relatedSections: ['§87-89']
     },
     {
       id: 23,
       category: 'Membership',
-      section: 'Â§87',
+      section: '§87',
       title: 'Membership Termination Bylaw',
       description: 'Terminate permanent member via bylaw',
-      deadline: 'â‰¥30 days notice before 1st reading; hearing if requested',
+      deadline: '≥30 days notice before 1st reading; hearing if requested',
       frequency: 'When grounds exist',
       type: 'Legislative',
       priority: 'High',
       responsible: 'Settlement Council',
-      action: 'Grounds: (a) abandoned settlement, or (b) absent 12+ months without reason. Give â‰¥30 days written notice of proposal. Hearing opportunity. Follow 3-reading process.',
-      consequences: 'Invalid without notice/grounds. Appealable to MSAT within 30 days. Send to Minister. If upheld: membership and land Â§95 terminated.',
-      relatedSections: ['Â§88-89', 'Â§95']
+      action: 'Grounds: (a) abandoned settlement, or (b) absent 12+ months without reason. Give ≥30 days written notice of proposal. Hearing opportunity. Follow 3-reading process.',
+      consequences: 'Invalid without notice/grounds. Appealable to MSAT within 30 days. Send to Minister. If upheld: membership and land §95 terminated.',
+      relatedSections: ['§88-89', '§95']
     },
     {
       id: 24,
       category: 'Membership',
-      section: 'Â§85',
+      section: '§85',
       title: 'Leaves of Absence',
       description: 'Grant and track authorized leaves',
       deadline: 'Annual written confirmation required',
@@ -516,13 +516,13 @@ const ComplianceTrackerApp = () => {
       priority: 'Medium',
       responsible: 'Member; Council',
       action: 'Auto-qualify: MSGC/public service, education, medical, incarceration, military. Must maintain residence and send yearly letter affirming return intent. Council may grant other leaves.',
-      consequences: 'Without leave and annual confirmation, 12+ month absence = termination grounds Â§87. Leave protects status. On leave = deemed resident.',
-      relatedSections: ['Â§87']
+      consequences: 'Without leave and annual confirmation, 12+ month absence = termination grounds §87. Leave protects status. On leave = deemed resident.',
+      relatedSections: ['§87']
     },
     {
       id: 25,
       category: 'Membership',
-      section: 'Â§93-94.1',
+      section: '§93-94.1',
       title: 'Expulsion Orders',
       description: 'Expel non-members for unauthorized residence or just cause',
       deadline: 'Hearing before order; 30-day appeal period',
@@ -531,15 +531,15 @@ const ComplianceTrackerApp = () => {
       priority: 'Medium',
       responsible: 'Settlement Council',
       action: 'May expel for: just cause (bylaw violations, danger), or ineligibility. Give chance to explain before order. Set departure date.',
-      consequences: "Appeal to MSAT within 30 days (stayed during appeal). If upheld/no appeal: Court of King's Bench enforcement order Â§94.1. RCMP/sheriffs enforce.",
-      relatedSections: ['Â§92', 'Â§94']
+      consequences: "Appeal to MSAT within 30 days (stayed during appeal). If upheld/no appeal: Court of King's Bench enforcement order §94.1. RCMP/sheriffs enforce.",
+      relatedSections: ['§92', '§94']
     },
 
     // LAND MANAGEMENT
     {
       id: 26,
       category: 'Land',
-      section: 'MSLR Reg Â§29(1)(g)',
+      section: 'MSLR Reg §29(1)(g)',
       title: 'Land Holding Cap',
       description: 'Enforce max acreage: 175/settlement, 350 total',
       deadline: 'At each transfer/grant',
@@ -549,12 +549,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSLR Registrar',
       action: 'MSLR system rejects transfers exceeding caps. Member must dispose of other land to acquire more.',
       consequences: 'Over-cap transfers rejected. Cannot register until adjusted.',
-      relatedSections: ['MSGC Land Policy GC-1997-01 Â§3.4']
+      relatedSections: ['MSGC Land Policy GC-1997-01 §3.4']
     },
     {
       id: 27,
       category: 'Land',
-      section: 'Â§106; AR 363/91',
+      section: '§106; AR 363/91',
       title: 'Subdivision Approval',
       description: 'Approval required to divide parcels',
       deadline: 'Before partial transfer; Council decides within 90 days',
@@ -562,14 +562,14 @@ const ComplianceTrackerApp = () => {
       type: 'Procedural',
       priority: 'High',
       responsible: 'Settlement Council; Registrar',
-      action: 'Subdivision = transfer of part of parcel (>3 year term). Exception: lease â‰¤3 years. Submit application with survey.',
+      action: 'Subdivision = transfer of part of parcel (>3 year term). Exception: lease ≤3 years. Submit application with survey.',
       consequences: 'Unapproved subdivisions void. Registrar refuses registration. No legal title for occupants.',
-      relatedSections: ['AR 363/91 Â§Â§2-5']
+      relatedSections: ['AR 363/91 §§2-5']
     },
     {
       id: 28,
       category: 'Land',
-      section: 'MSLR Reg Â§79; Dower Act',
+      section: 'MSLR Reg §79; Dower Act',
       title: 'Spousal Consent (Dower)',
       description: 'Spouse must consent to homestead disposition',
       deadline: 'At time of transfer/mortgage',
@@ -584,7 +584,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 29,
       category: 'Land',
-      section: 'MSLR Reg Â§92',
+      section: 'MSLR Reg §92',
       title: 'Estate Instructions Filing',
       description: 'File will for settlement land succession',
       deadline: 'Best upon land acquisition or family change',
@@ -601,7 +601,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 30,
       category: 'MSGC',
-      section: 'Â§144-145',
+      section: '§144-145',
       title: 'Financial Allocation Policy',
       description: 'MSGC policy distributing Consolidated Fund',
       deadline: 'Before each fiscal year (April 1)',
@@ -617,7 +617,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 31,
       category: 'MSGC',
-      section: 'Â§142',
+      section: '§142',
       title: 'Consolidated Fund Payments',
       description: 'Authorized payments from Consolidated Fund',
       deadline: 'Annual funding cycle (quarterly transfers)',
@@ -625,14 +625,14 @@ const ComplianceTrackerApp = () => {
       type: 'Financial',
       priority: 'Critical',
       responsible: 'MSGC Executive',
-      action: 'Part 1: pay per allocation policy, interim advances (â‰¤$100k), investments, error refunds, admin costs. Part 2: only per GCP. Deduct settlement debts.',
+      action: 'Part 1: pay per allocation policy, interim advances (≤$100k), investments, error refunds, admin costs. Part 2: only per GCP. Deduct settlement debts.',
       consequences: 'Unauthorized disbursements violate MSA. Auditors flag. Settlements can sue. Minister can withhold future funds or issue directives.',
-      relatedSections: ['Â§143']
+      relatedSections: ['§143']
     },
     {
       id: 32,
       category: 'MSGC',
-      section: 'Â§163(2)',
+      section: '§163(2)',
       title: 'MSGC Fund Audit',
       description: 'Annual audit of Consolidated Fund',
       deadline: 'After March 31; mid-summer completion',
@@ -648,7 +648,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 33,
       category: 'Ministerial',
-      section: 'Â§224',
+      section: '§224',
       title: 'Ministerial Veto/Approval',
       description: 'Minister veto window for certain GC Policies',
       deadline: '90 days after policy submission',
@@ -658,12 +658,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Minister; MSGC',
       action: 'MSGC submits new policies to Minister. 90-day veto window for specified areas (policing, health, education). Some need affirmative approval.',
       consequences: 'Vetoed policy has no effect. Implementing vetoed policy invalid. Non-approved required policies unenforceable.',
-      relatedSections: ['Â§225-226', 'Â§55']
+      relatedSections: ['§225-226', '§55']
     },
     {
       id: 34,
       category: 'Ministerial',
-      section: 'Â§160-162',
+      section: '§160-162',
       title: 'Ministerial Audits/Investigations',
       description: 'Minister oversight powers for audits',
       deadline: "At Minister's discretion",
@@ -672,13 +672,13 @@ const ComplianceTrackerApp = () => {
       priority: 'High',
       responsible: 'Minister; Settlements/MSGC',
       action: 'Minister may order audit/inspection of settlement/MSGC books, use of funds, bank accounts. Can seize records via court order. Officials must cooperate.',
-      consequences: 'Obstruction = offense/contempt. Non-cooperation risks funding withholding. Findings may lead to: councillor removal recommendations, Official Manager Â§31, or legislation.',
-      relatedSections: ['Â§31', 'Â§171-179']
+      consequences: 'Obstruction = offense/contempt. Non-cooperation risks funding withholding. Findings may lead to: councillor removal recommendations, Official Manager §31, or legislation.',
+      relatedSections: ['§31', '§171-179']
     },
     {
       id: 35,
       category: 'Tribunal',
-      section: 'Â§213',
+      section: '§213',
       title: 'MSAT Funding & Appointments',
       description: 'Maintain Appeal Tribunal roster and funding',
       deadline: 'Ongoing; appointments as terms expire',
@@ -686,16 +686,16 @@ const ComplianceTrackerApp = () => {
       type: 'Procedural',
       priority: 'High',
       responsible: 'MSGC; Minister',
-      action: 'MSGC funds MSAT via Consolidated Fund. â‰¥7 members: Chair (Minister after MSGC consult), members jointly appointed by MSGC/Minister. Collaborate on full roster.',
+      action: 'MSGC funds MSAT via Consolidated Fund. ≥7 members: Chair (Minister after MSGC consult), members jointly appointed by MSGC/Minister. Collaborate on full roster.',
       consequences: 'Insufficient tribunal capacity delays appeals (membership, land, elections, surface access). MSGC must ensure resources and training.',
-      relatedSections: ['Â§180-213']
+      relatedSections: ['§180-213']
     },
 
     // ADDITIONAL CRITICAL ITEMS
     {
       id: 36,
       category: 'Governance',
-      section: 'Â§57-60',
+      section: '§57-60',
       title: 'Bylaw Petition Processing',
       description: 'Process valid bylaw petitions from members',
       deadline: 'Within 30 days: prepare bylaw, 1st/2nd reading. Public meeting within 30 days of 1st reading.',
@@ -703,9 +703,9 @@ const ComplianceTrackerApp = () => {
       type: 'Procedural',
       priority: 'High',
       responsible: 'Settlement Council',
-      action: 'Verify â‰¥20% member signatures (per census). Administrator determines sufficiency within 30 days. Prepare bylaw per petition subject, give readings, schedule public meeting.',
+      action: 'Verify ≥20% member signatures (per census). Administrator determines sufficiency within 30 days. Prepare bylaw per petition subject, give readings, schedule public meeting.',
       consequences: 'If defeated, can refuse similar petitions for 1 year. If approved at public meeting, pass bylaw within 30 days without alteration.',
-      relatedSections: ['Â§58-59']
+      relatedSections: ['§58-59']
     },
     {
       id: 37,
@@ -720,12 +720,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSGC; Settlement Council; MSAT',
       action: 'Posting requests reviewed by MSAC (42 days). Development agreements negotiated. Surface access via MSAT Land Access Panel if no agreement.',
       consequences: 'Non-compliance jeopardizes revenue. Legal disputes. Companies can seek MSAT entry orders similar to Surface Rights Board.',
-      relatedSections: ['MSA Part 4, Â§111-129']
+      relatedSections: ['MSA Part 4, §111-129']
     },
     {
       id: 38,
       category: 'Governance',
-      section: 'Â§23',
+      section: '§23',
       title: 'Oath of Office',
       description: 'All councillors take official oath before duties',
       deadline: 'Before starting duties (at organizational meeting)',
@@ -739,7 +739,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 39,
       category: 'Tribunal',
-      section: 'APAGA Â§19; MSA Â§212',
+      section: 'APAGA §19; MSA §212',
       title: 'MSAT Mandate Review',
       description: '7-year review of MSAT operations and mandate',
       deadline: 'Every 7 years (next due 2026)',
@@ -749,12 +749,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Minister of Indigenous Relations; MSAT',
       action: "Conduct comprehensive review of MSAT's mandate, effectiveness, and operations. Prepare report for Executive Council. Consult with MSGC and settlements.",
       consequences: 'Failure to conduct review may lead to loss of funding or legislative changes. Negative findings could result in restructuring or reduced authority.',
-      relatedSections: ['APAGA Â§20-22', 'MSA Â§201-213']
+      relatedSections: ['APAGA §20-22', 'MSA §201-213']
     },
     {
       id: 40,
       category: 'Tribunal',
-      section: 'Conflicts of Interest Act Â§23.922',
+      section: 'Conflicts of Interest Act §23.922',
       title: 'MSAT Code of Conduct',
       description: 'Maintain and enforce ethical standards for tribunal members',
       deadline: 'Ongoing; annual affirmation required',
@@ -764,7 +764,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSAT Chair; Ethics Commissioner',
       action: 'Develop, implement, and enforce Code of Conduct covering conflicts of interest, impartiality, and disclosure requirements. File with Ethics Commissioner. Provide annual training.',
       consequences: 'Non-compliance may result in investigations by Ethics Commissioner. Tribunal decisions could be challenged if ethical breaches occur.',
-      relatedSections: ['MSA Â§208', 'APAGA Â§13']
+      relatedSections: ['MSA §208', 'APAGA §13']
     },
     {
       id: 41,
@@ -779,7 +779,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Administrator; FOIP Coordinator',
       action: 'Process access to information requests: log receipt, search for records, apply exemptions if applicable, provide response within timeline. Maintain privacy of personal information.',
       consequences: 'Failure to respond may result in orders from Information and Privacy Commissioner. Potential fines or public reporting of non-compliance.',
-      relatedSections: ['MSA Â§44(1)', 'Local Authorities Election Act']
+      relatedSections: ['MSA §44(1)', 'Local Authorities Election Act']
     },
     {
       id: 42,
@@ -794,12 +794,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Council; Administrator',
       action: 'Respond to Ombudsman inquiries, provide requested documents, implement recommendations from investigations. Maintain internal complaint resolution processes.',
       consequences: 'Non-cooperation may result in critical public reports. Potential for increased provincial oversight or legislative changes.',
-      relatedSections: ['MSA Â§171-176']
+      relatedSections: ['MSA §171-176']
     },
     {
       id: 43,
       category: 'Tribunal',
-      section: 'APAGA Â§13-15',
+      section: 'APAGA §13-15',
       title: 'Public Agency Governance',
       description: 'Comply with public agency appointment and compensation rules',
       deadline: 'Ongoing; at each appointment/renewal',
@@ -809,7 +809,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSGC; Minister of Indigenous Relations',
       action: 'Follow Public Agency Secretariat guidelines for MSAT appointments: public recruitment, merit-based selection, compensation within approved ranges. Maintain appointment records.',
       consequences: 'Improper appointments may be invalidated. Could result in funding withholding or ministerial intervention.',
-      relatedSections: ['MSA Â§201-208']
+      relatedSections: ['MSA §201-208']
     },
     {
       id: 44,
@@ -824,12 +824,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSLR Registrar; Landowners',
       action: 'Verify spousal consent for all homestead dispositions. Maintain records of consents or affidavits. Provide information to members about dower rights.',
       consequences: 'Transactions without proper consent are voidable. Spouses can challenge dispositions. Potential legal liability for settlement officials.',
-      relatedSections: ['MSLR Reg Â§79', 'MSA Â§106']
+      relatedSections: ['MSLR Reg §79', 'MSA §106']
     },
     {
       id: 45,
       category: 'Financial',
-      section: 'MSA Â§142(2); APAGA Â§25',
+      section: 'MSA §142(2); APAGA §25',
       title: 'Consolidated Fund Investment',
       description: 'Prudent investment of settlement funds',
       deadline: 'Ongoing monitoring',
@@ -839,12 +839,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSGC Treasurer; Settlement Councils',
       action: 'Invest Consolidated Fund and settlement funds according to approved investment policies. Regularly review performance and risk. Report to members annually.',
       consequences: 'Imprudent investments may result in financial losses. Could trigger ministerial intervention or legal action from members.',
-      relatedSections: ['MSA Â§143', 'MSA Â§159']
+      relatedSections: ['MSA §143', 'MSA §159']
     },
     {
       id: 46,
       category: 'Governance',
-      section: 'MSA Â§233; LAEA',
+      section: 'MSA §233; LAEA',
       title: 'Public Notice Requirements',
       description: 'Proper notice for meetings and decisions',
       deadline: 'As required by specific provisions (typically 7-30 days)',
@@ -854,12 +854,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Administrator',
       action: 'Provide written notice for: council meetings (when required), public meetings, bylaw readings, membership decisions, and other matters as specified in MSA. Post in settlement office and other required locations.',
       consequences: 'Inadequate notice may invalidate decisions. Could result in successful appeals or legal challenges.',
-      relatedSections: ['Â§5(2)', 'Â§6(3)', 'Â§54']
+      relatedSections: ['§5(2)', '§6(3)', '§54']
     },
     {
       id: 47,
       category: 'Tribunal',
-      section: 'MSA Â§180-185',
+      section: 'MSA §180-185',
       title: 'MSAT Land Access Panel',
       description: 'Surface access dispute resolution',
       deadline: 'Within 60 days of application',
@@ -869,12 +869,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSAT Land Access Panel',
       action: 'Hear applications for surface access orders when settlement and industry cannot agree. Conduct hearings, issue orders with terms and conditions. Monitor compliance.',
       consequences: "Delays may hinder resource development. Improper orders could be appealed to Court of King's Bench.",
-      relatedSections: ['MSA Â§111-129', 'Co-management Agreement']
+      relatedSections: ['MSA §111-129', 'Co-management Agreement']
     },
     {
       id: 48,
       category: 'Financial',
-      section: 'MSA Â§158; APAGA Â§26',
+      section: 'MSA §158; APAGA §26',
       title: 'Financial Risk Management',
       description: 'Identify and mitigate financial risks',
       deadline: 'Annual review',
@@ -884,12 +884,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Council; MSGC',
       action: 'Conduct annual financial risk assessment. Implement controls for major risks. Report significant risks to members and Minister. Maintain adequate insurance coverage.',
       consequences: 'Failure to manage risks could lead to financial losses. May result in increased premiums or loss of insurance coverage.',
-      relatedSections: ['MSA Â§163', 'MSA Â§176']
+      relatedSections: ['MSA §163', 'MSA §176']
     },
     {
       id: 49,
       category: 'Governance',
-      section: 'MSA Â§171-176',
+      section: 'MSA §171-176',
       title: 'Ministerial Review Response',
       description: 'Respond to ministerial management reviews',
       deadline: 'As specified in review notice',
@@ -899,12 +899,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Council; MSGC',
       action: 'Cooperate fully with ministerial reviews. Provide requested documents and information. Implement recommended corrective actions within specified timelines.',
       consequences: 'Non-cooperation may result in appointment of Official Manager or other intervention measures. Could lead to loss of local control.',
-      relatedSections: ['MSA Â§31', 'MSA Â§160-162']
+      relatedSections: ['MSA §31', 'MSA §160-162']
     },
     {
       id: 50,
       category: 'Land',
-      section: 'MSLR Reg Â§35-40',
+      section: 'MSLR Reg §35-40',
       title: 'Land Registry Accuracy',
       description: 'Maintain accurate land records',
       deadline: 'Ongoing; updates within 30 days of changes',
@@ -914,13 +914,13 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSLR Registrar; Settlement Administrator',
       action: 'Ensure all land transactions are properly recorded. Verify accuracy of title documents. Conduct periodic audits of land records. Resolve discrepancies promptly.',
       consequences: 'Inaccurate records may lead to ownership disputes. Could result in legal challenges or financial losses for affected members.',
-      relatedSections: ['MSA Â§106', 'MSA Â§110']
+      relatedSections: ['MSA §106', 'MSA §110']
     }
     ,
     {
       id: 51,
       category: 'Land',
-      section: 'MSLR Reg Â§30(1)(b), Â§30(2), Â§73(1)(a)(ii); MSLR Policy #2',
+      section: 'MSLR Reg §30(1)(b), §30(2), §73(1)(a)(ii); MSLR Policy #2',
       title: 'PMT Expiry Notice',
       description: 'Issue 60-day advance notice of Provisional Métis Title expiry',
       deadline: 'Â≥60 days before PMT expiry',
@@ -935,7 +935,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 52,
       category: 'Land',
-      section: 'MSLR Reg Â§30, Â§73; MSLR Policy #2',
+      section: 'MSLR Reg §30, §73; MSLR Policy #2',
       title: 'PMT Renewal Cut-off',
       description: 'Accept renewals only on or before expiry date',
       deadline: 'On or before PMT expiry',
@@ -1025,7 +1025,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 58,
       category: 'Land',
-      section: 'MSA Â§180-185; Surface Access',
+      section: 'MSA §180-185; Surface Access',
       title: 'Surface Access Agreement or MSAT Order',
       description: 'Secure lawful entry and compensation before surface disturbance',
       deadline: 'Before entry to settlement land',
@@ -1040,7 +1040,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 59,
       category: 'Membership',
-      section: 'MSA Â§96-98',
+      section: 'MSA §96-98',
       title: 'Members List Updates',
       description: 'Notify Minister/MSLR of approvals and terminations',
       deadline: 'Immediately after council decision',
@@ -1050,7 +1050,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Council; Settlement Administrator; MSLR Registrar',
       action: 'File notice to update Settlement Members List on approvals, resignations, and terminations.',
       consequences: 'Inaccurate list affects voting, benefits, and legal standing; potential disputes.',
-      relatedSections: ['Information Access Â§98']
+      relatedSections: ['Information Access §98']
     },
     {
       id: 60,
@@ -1065,7 +1065,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Administrator',
       action: 'Verify residence within settlement area and confirm recording on Members List; close application file.',
       consequences: 'Unperfected membership may invalidate subsequent rights or benefits.',
-      relatedSections: ['Members List Â§96-98']
+      relatedSections: ['Members List §96-98']
     },
     {
       id: 61,
@@ -1100,7 +1100,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 63,
       category: 'Membership',
-      section: 'MSA Â§98; MSLR Policy Guide No.1',
+      section: 'MSA §98; MSLR Policy Guide No.1',
       title: 'Members List Access Control',
       description: 'Restrict Members List to authorized requesters',
       deadline: 'At each request',
@@ -1108,9 +1108,9 @@ const ComplianceTrackerApp = () => {
       type: 'Compliance',
       priority: 'High',
       responsible: 'MSLR Registrar; Settlement Administrator',
-      action: 'Verify authority under Â§98, require written request, release confidentially (sealed or registered mail).',
+      action: 'Verify authority under §98, require written request, release confidentially (sealed or registered mail).',
       consequences: 'Unauthorized disclosure breaches FOIP and MSA; OIPC complaints and liability.',
-      relatedSections: ['FOIP Act', 'MSA Â§98']
+      relatedSections: ['FOIP Act', 'MSA §98']
     },
     {
       id: 64,
@@ -1130,7 +1130,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 65,
       category: 'Membership',
-      section: 'MSA Â§90; Â§96-97; MSLR Policy Guide No.6',
+      section: 'MSA §90; §96-97; MSLR Policy Guide No.6',
       title: 'Termination on Indian Registration',
       description: 'Remove member who registers as an Indian post-1990',
       deadline: 'Upon verification',
@@ -1140,7 +1140,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'Minister/MSLR Registrar; Settlement Council',
       action: 'Initiate verification with ISC as needed; remove from Members List once confirmed; notify council and individual.',
       consequences: 'Dual status undermines rolls, voting, and benefits; decisions vulnerable to challenge.',
-      relatedSections: ['MSA Â§96-98']
+      relatedSections: ['MSA §96-98']
     },
     {
       id: 66,
@@ -1220,7 +1220,7 @@ const ComplianceTrackerApp = () => {
     {
       id: 71,
       category: 'Tribunal',
-      section: 'APAGA Â§13-15; MSAT MRD',
+      section: 'APAGA §13-15; MSAT MRD',
       title: 'MSAT Mandate and Roles Review',
       description: 'Maintain public Mandate and Roles Document',
       deadline: 'Every 3 years or on Minister/Chair change',
@@ -1245,7 +1245,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'Returning Officer; Settlement Administrator',
       action: 'Extract eligible resident members as of roll date; process challenges and corrections per LAEA adaptations.',
       consequences: 'Elector challenges; election contest risk.',
-      relatedSections: ['Â§12-13 (cycle)', 'Â§21-22 (by-elections)']
+      relatedSections: ['§12-13 (cycle)', '§21-22 (by-elections)']
     },
     {
       id: 73,
@@ -1260,12 +1260,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Council',
       action: 'Pass tax rate bylaw; issue tax notices; align levy with budgeted needs.',
       consequences: 'Levy invalid; collection impeded; cash flow risk.',
-      relatedSections: ['Assessment Notices', 'Budget Bylaw Â§157']
+      relatedSections: ['Assessment Notices', 'Budget Bylaw §157']
     },
     {
       id: 74,
       category: 'Financial',
-      section: 'Business Property Contributions Bylaw (1997) Part 4 Â§4.01',
+      section: 'Business Property Contributions Bylaw (1997) Part 4 §4.01',
       title: 'Appoint Contributions Administrator',
       description: 'Designate official to manage contributions program',
       deadline: 'By January 31 annually',
@@ -1275,12 +1275,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Settlement Council',
       action: 'Appoint administrator to run valuation, notices, collections, and records under the bylaw.',
       consequences: 'Inability to levy or collect contributions lawfully.',
-      relatedSections: ['Part 3 Valuation', 'Â§4.03-4.08 Payments']
+      relatedSections: ['Part 3 Valuation', '§4.03-4.08 Payments']
     },
     {
       id: 75,
       category: 'Financial',
-      section: 'Business Property Contributions Bylaw Part 3 Â§Â§3.02-3.10',
+      section: 'Business Property Contributions Bylaw Part 3 §§3.02-3.10',
       title: 'Valuation List and Notices',
       description: 'Prepare valuation list and issue valuation and contribution notices',
       deadline: 'Per bylaw calendar',
@@ -1290,12 +1290,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Contributions Administrator; Valuator',
       action: 'Appoint valuator; prepare valuation list; send valuation and contribution notices; manage complaints and MSAT appeals.',
       consequences: 'Levy set aside on appeal; cash flow impacts.',
-      relatedSections: ['Â§3.12 Appeals', 'Â§4.04 Payment Due']
+      relatedSections: ['§3.12 Appeals', '§4.04 Payment Due']
     },
     {
       id: 76,
       category: 'Financial',
-      section: 'Business Property Contributions Bylaw Â§Â§4.03-4.08',
+      section: 'Business Property Contributions Bylaw §§4.03-4.08',
       title: 'Contribution Payment and Debt',
       description: 'Collect contributions and enforce unpaid amounts',
       deadline: 'By due date in notice',
@@ -1305,12 +1305,12 @@ const ComplianceTrackerApp = () => {
       responsible: 'Contributions Administrator',
       action: 'Receive payments, issue confirmations, apply payments, treat unpaid contributions as a debt owing.',
       consequences: 'Debt recovery actions; interest or penalties; service impacts.',
-      relatedSections: ['Â§4.09 Fire Insurance Proceeds']
+      relatedSections: ['§4.09 Fire Insurance Proceeds']
     },
     {
       id: 77,
       category: 'Land',
-      section: 'MSLR Reg Â§92; MSGC Land Policy Part 7',
+      section: 'MSLR Reg §92; MSGC Land Policy Part 7',
       title: 'Estate Instructions Confidentiality',
       description: 'Release estate instructions only to authorized parties',
       deadline: 'Upon written request',
@@ -1320,7 +1320,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'MSLR Registrar',
       action: 'Disclose to member, or upon death to spouse, children, council, land trustee, or estate administrator, per policy.',
       consequences: 'Privacy breach; contested transfers; liability.',
-      relatedSections: ['Land Policy Â§7.7', 'Â§7.13 (most recent applies)']
+      relatedSections: ['Land Policy §7.7', '§7.13 (most recent applies)']
     },
     {
       id: 78,
@@ -1350,7 +1350,7 @@ const ComplianceTrackerApp = () => {
       responsible: 'Individual Councillors; Settlement Council',
       action: 'Sign code acknowledgment; file annual disclosure updates; ensure recusal protocols at meetings.',
       consequences: 'Ethics findings; potential removal; decisions at risk.',
-      relatedSections: ['Â§39, Â§39.1', 'APAGA ethics guidance']
+      relatedSections: ['§39, §39.1', 'APAGA ethics guidance']
     }
   ];
 
@@ -2041,7 +2041,7 @@ const ComplianceTrackerApp = () => {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <span className={`text-xs font-mono ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'} px-2 py-1 rounded`}>
-                Â§ {item.section}
+                § {item.section}
               </span>
               <span className={`text-xs px-2 py-1 rounded font-medium ${getTypeColor(item.type)}`}>
                 {item.type}
@@ -2227,7 +2227,7 @@ const ComplianceTrackerApp = () => {
                   <button className="text-blue-600 hover:underline" onClick={() => setSelectedItem(item)}>
                     {item.title}
                   </button>
-                  <div className="text-xs text-gray-400">Â§ {item.section}</div>
+                  <div className="text-xs text-gray-400">§ {item.section}</div>
                 </td>
                 <td className="py-2 px-2">{item.category}</td>
                 <td className="py-2 px-2">{item.type}</td>
@@ -2666,7 +2666,7 @@ const ComplianceTrackerApp = () => {
               <CalendarDays className="w-4 h-4 text-gray-400" />
               <div>
                 <div className="font-medium">{r.label}</div>
-                <div className="text-xs text-gray-500">{item ? item.title : `Item #${r.itemId}`} â€” {new Date(r.date).toDateString()}</div>
+                <div className="text-xs text-gray-500">{item ? item.title : `Item #${r.itemId}`} — {new Date(r.date).toDateString()}</div>
               </div>
             </div>
             <button className="text-red-600 text-xs hover:underline" onClick={() => onRemove(idx)}>Remove</button>
@@ -2701,10 +2701,10 @@ const ComplianceTrackerApp = () => {
                         <div className={`${cardClasses} rounded p-3 border hover:shadow cursor-pointer`} onClick={() => setSelectedItem(item)}>
                           <div className="flex items-center justify-between">
                             <div className="font-semibold">{item.title}</div>
-                            <div className="text-xs text-gray-500">Â§ {item.section}</div>
+                            <div className="text-xs text-gray-500">§ {item.section}</div>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
-                            {item.deadline} â€” {item.frequency || 'One-time'}
+                            {item.deadline} — {item.frequency || 'One-time'}
                           </div>
                           <div className="mt-2 flex items-center gap-2">
                             <span className={`text-xs px-2 py-1 rounded ${getTypeColor(item.type)}`}>{item.type}</span>
@@ -2784,7 +2784,7 @@ const ComplianceTrackerApp = () => {
                         className="text-[11px] px-1 py-0.5 rounded bg-blue-100 text-blue-800 cursor-pointer"
                         onClick={() => setSelectedItem(mi)}
                       >
-                        {mi.title.slice(0, 20)}{mi.title.length > 20 ? 'â€¦' : ''}
+                        {mi.title.slice(0, 20)}{mi.title.length > 20 ? '…' : ''}
                       </div>
                     ))}
                     {matchedItems.length > 3 && (
@@ -2952,10 +2952,10 @@ const ComplianceTrackerApp = () => {
           <strong>Risk prioritization:</strong> Focus on Critical and High items first; mark In Progress and log notes for accountability.
         </li>
         <li>
-          <strong>Transparency:</strong> Document posting (Â§44) and public meetings (Â§54-55) require sufficient notice; attach proof in each item.
+          <strong>Transparency:</strong> Document posting (§44) and public meetings (§54-55) require sufficient notice; attach proof in each item.
         </li>
         <li>
-          <strong>Oversight readiness:</strong> Keep audit-ready records for ministerial audits (Â§160-162) and MSGC fund audits (Â§163).
+          <strong>Oversight readiness:</strong> Keep audit-ready records for ministerial audits (§160-162) and MSGC fund audits (§163).
         </li>
         <li>
           <strong>Land management:</strong> Enforce caps, subdivision approvals, and dower compliance consistently; add reminders per transfer event.
