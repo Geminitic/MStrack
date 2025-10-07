@@ -37,6 +37,11 @@
 // }
 
 // The rest of your JSX code follows...
+// Alias React hooks from global React (UMD)
+const { useState, useMemo, useEffect, useCallback, useRef } = React;
+
+// Safely grab lucide icons from the global UMD export (works with the CDN)
+const _lucide = window.lucide || window.Lucide || window.LucideReact || {};
 const {
   Calendar,
   Clock,
@@ -90,7 +95,7 @@ const {
   Save,
   RefreshCcw,
   CalendarDays
-} = lucide;
+} = _lucide;
 
 const ComplianceTrackerApp = () => {
   const [searchTerm, setSearchTerm] = useState('');
