@@ -1,0 +1,2541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Compliance Tracker</title>
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; }
+    /* You can add extra styles here */
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+
+```jsx
+// ComplianceTrackerApp.jsx
+// Single-file comprehensive React web app for the MÃ©tis Settlements Act compliance visualization and tracking.
+// - Interactive search, filters, high-priority toggle
+// - Dashboard summary, charts (SVG), timeline view, calendar view
+// - Detail modal with legal basis, actions, consequences, related sections
+// - Role-based quick filters
+// - Status tracking (Pending, In Progress, Completed, Overdue)
+// - Notes per item, attachments placeholder, audit log, localStorage persistence
+// - Export CSV/JSON, Import JSON
+//
+// Usage: Place this file in a React project (e.g., src/ComplianceTrackerApp.jsx) and import in App.jsx.
+// Requires: react, lucide-react. Tailwind CSS classes are used for styling but can be replaced.
+//
+// Example:
+// import React from 'react';
+// import ComplianceTrackerApp from './ComplianceTrackerApp';
+// export default function App() {
+//   return <ComplianceTrackerApp />;
+// }
+
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import {
+  Calendar,
+  Clock,
+  FileText,
+  Users,
+  AlertCircle,
+  Filter,
+  Search,
+  CheckCircle,
+  AlertTriangle,
+  Building2,
+  Gavel,
+  Scale,
+  Home,
+  ShieldCheck,
+  BookOpen,
+  ScrollText,
+  Landmark,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  X,
+  Download,
+  Upload,
+  Info,
+  BarChart2,
+  PieChart,
+  ListChecks,
+  ClipboardList,
+  Sparkles,
+  Layers,
+  Map,
+  MapPin,
+  Target,
+  Bell,
+  BellRing,
+  Mail,
+  Phone,
+  Globe,
+  Printer,
+  Share2,
+  Archive,
+  Edit,
+  Trash2,
+  Link,
+  Settings,
+  HelpCircle,
+  PauseCircle,
+  PlayCircle,
+  Square,
+  Save,
+  RefreshCcw,
+  CalendarDays
+} from 'lucide-react';
+
+const ComplianceTrackerApp = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [filterParty, setFilterParty] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showHighPriority, setShowHighPriority] = useState(false);
+  const [viewMode, setViewMode] = useState('grid'); // grid | table | timeline | calendar | dashboard
+  const [rolePreset, setRolePreset] = useState('all'); // all | council | administrator | registrar | msgc | msat | minister
+  const [statusMap, setStatusMap] = useState({}); // { [id]: 'Pending' | 'In Progress' | 'Completed' | 'Overdue' }
+  const [notesMap, setNotesMap] = useState({}); // { [id]: string }
+  const [auditLog, setAuditLog] = useState([]); // array of { ts, action, itemId, details }
+  const [attachmentsMap, setAttachmentsMap] = useState({}); // { [id]: array of {name, size, type} }
+  const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [printMode, setPrintMode] = useState(false);
+  const [dashboardExpanded, setDashboardExpanded] = useState(true);
+  const [quickView, setQuickView] = useState('all'); // all | upcoming | overdue | completed | critical
+  const [sortKey, setSortKey] = useState('priority'); // priority | title | category | deadline | type
+  const [sortDir, setSortDir] = useState('asc'); // asc | desc
+  const [reminderList, setReminderList] = useState([]); // [{ itemId, label, date }]
+  const [collapsedCategories, setCollapsedCategories] = useState({});
+  const [theme, setTheme] = useState('light');
+
+  // Comprehensive compliance obligations from MSA and 2025 compliance update
+  const complianceItems = [
+    // COUNCIL GOVERNANCE & ELECTIONS
+    {
+      id: 1,
+      category: 'Governance',
+      section: 'Â§12, Â§13; AR 145/93',
+      title: 'General Election Cycle',
+      description: 'Hold regular council elections per Local Authorities Election Act adaptations',
+      deadline: 'Every 4 years (October 2025, 2029, etc.)',
+      frequency: 'Every 4 years',
+      type: 'Election',
+      priority: 'Critical',
+      responsible: 'Settlement Council (via Returning Officer)',
+      action: 'Conduct general election with proper notices, nominations, voting procedures. Councillors serve until successors elected.',
+      consequences: 'Council mandate lapses. Ministerial intervention under Â§30-31 (Official Manager). Legal challenge under LAEA possible. Settlement cannot legally function.',
+      trigger: 'Fixed 4-year cycle',
+      cyclicDate: 'First Monday in October',
+      relatedSections: ['Â§30-31']
+    },
+    {
+      id: 2,
+      category: 'Governance',
+      section: 'Â§8(1.1)-(1.2)',
+      title: 'Council Size Resolution',
+      description: 'Determine councillors (3-5) by resolution before election',
+      deadline: 'â‰¥6 months before election',
+      frequency: 'Before each election',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: 'Pass resolution establishing council size (3, 4, or 5). Cannot change size during own term.',
+      consequences: 'Defaults to 3 councillors. Larger council not permitted without timely resolution.',
+      trigger: '6+ months pre-election'
+    },
+    {
+      id: 3,
+      category: 'Governance',
+      section: 'Â§15-17; LAEA',
+      title: 'Councillor Eligibility Enforcement',
+      description: 'Verify candidate eligibility per LAEA adaptations',
+      deadline: 'During nomination/election period',
+      frequency: 'Each election',
+      type: 'Procedural',
+      priority: 'Critical',
+      responsible: 'Settlement Administrator (Returning Officer)',
+      action: 'Verify: settlement member status, no disqualifying debt (>$250 without agreement), no criminal convictions per Â§17(1)(b), not otherwise ineligible Â§17(1)(a).',
+      consequences: "Ineligible candidate election void. Election contestable in Court of King's Bench. Results may be overturned.",
+      relatedSections: ['Â§26-29']
+    },
+    {
+      id: 4,
+      category: 'Governance',
+      section: 'Â§21, Â§22; LAEA',
+      title: 'By-Elections for Vacancies',
+      description: 'Fill vacant council seats if vacancy early in term',
+      deadline: 'Within ~90 days (LAEA); if >180 days before next general election',
+      frequency: 'As needed',
+      type: 'Election',
+      priority: 'High',
+      responsible: 'Settlement Council (Returning Officer)',
+      action: 'Hold by-election. If vacancy in final 180 days, defer to general election per Â§21(b).',
+      consequences: 'Council shorthanded. If quorum lost, Minister may appoint Official Manager Â§31.',
+      relatedSections: ['Â§30-31', 'Â§38']
+    },
+    {
+      id: 5,
+      category: 'Governance',
+      section: 'Â§32(1); Â§10',
+      title: 'Organizational Meeting',
+      description: 'Inaugural meeting post-election to swear in and select Chair',
+      deadline: 'Within 14 days after election',
+      frequency: 'After each election',
+      type: 'Meeting',
+      priority: 'Critical',
+      responsible: 'Settlement Council',
+      action: 'Administrator gives written notice. Hold meeting to: administer oaths Â§23, appoint Chair (unless direct-election bylaw â‰¥180 days pre-election), establish committees.',
+      consequences: 'Cannot legally transact business until organizational meeting and oaths completed.',
+      relatedSections: ['Â§23', 'Â§10(3)']
+    },
+    {
+      id: 6,
+      category: 'Governance',
+      section: 'Â§5(1)-(2)',
+      title: 'Annual General Meeting',
+      description: 'Public meeting to report activities and finances',
+      deadline: 'Within 180 days after fiscal year-end (by Sept 30 if March 31 FY)',
+      frequency: 'Annual',
+      type: 'Meeting',
+      priority: 'High',
+      responsible: 'Settlement Council (Chair)',
+      action: 'Public notice per Â§233. Present: audited financials, 3-year business plan, discuss activities, allow member input.',
+      consequences: 'Transparency breach. Minister/member concerns. May trigger audits Â§160-162 or intervention Â§176.',
+      annualDate: 'September 30',
+      financialYear: true,
+      relatedSections: ['Â§163', 'Â§156.1', 'Â§233']
+    },
+    {
+      id: 7,
+      category: 'Governance',
+      section: 'Â§6(1)-(4)',
+      title: 'Special Membership Meeting',
+      description: 'Hold meeting when petitioned by â‰¥10% of members',
+      deadline: 'Within 30 days of valid petition; â‰¥7 days public notice',
+      frequency: 'As petitioned',
+      type: 'Meeting',
+      priority: 'High',
+      responsible: 'Settlement Chair',
+      action: 'Verify â‰¥10% signatures (per census). Give public notice (â‰¥7 days) with date, time, place, purpose. Hold within 30 days.',
+      consequences: 'Denies democratic rights. Ministerial scrutiny Â§171-176 or legal action possible.',
+      relatedSections: ['Â§233']
+    },
+    {
+      id: 8,
+      category: 'Governance',
+      section: 'Â§39, Â§39.1, Â§25',
+      title: 'Conflict of Interest Disclosure',
+      description: 'Disclose financial interests and abstain from conflicted votes',
+      deadline: 'At each meeting when interest arises; within 30 days of disqualification',
+      frequency: 'Continuous',
+      type: 'Procedural',
+      priority: 'Critical',
+      responsible: 'Individual Councillors',
+      action: 'Disclose financial interest in matters before council. Abstain from voting on resolutions. May deliberate but not vote on bylaws. Council enforces disqualification.',
+      consequences: 'Decisions void per Â§39.1. Disqualified refusing resignation: Court removal Â§26. Personal liability. Costs assigned.',
+      relatedSections: ['Â§26-29', 'Â§47.2']
+    },
+    {
+      id: 9,
+      category: 'Governance',
+      section: 'Â§11.1',
+      title: 'Councillor Remuneration Bylaw',
+      description: 'Set pay, benefits, expenses by bylaw',
+      deadline: 'Upon compensation changes; periodic review',
+      frequency: 'As needed',
+      type: 'Legislative',
+      priority: 'Medium',
+      responsible: 'Settlement Council',
+      action: "Bylaw sets: Chair remuneration, other councillors' pay (max 50% of Chair). Not subject to public vote Â§55.1.",
+      consequences: 'Payments without bylaw unauthorized Â§47.2. Minister can demand repayment. Audit flags.',
+      relatedSections: ['Â§47.2', 'Â§159.2', 'Â§55.1']
+    },
+
+    // FINANCIAL MANAGEMENT
+    {
+      id: 10,
+      category: 'Financial',
+      section: 'Â§156.1',
+      title: 'Three-Year Business Plan',
+      description: 'Strategic plan for 3 fiscal years',
+      deadline: 'By January 31 annually (for April 1 FY start)',
+      frequency: 'Annual',
+      type: 'Planning',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: "Plan must include: mission/core business, goals/strategies/performance targets, controlled entities' purposes. Review and update annually.",
+      consequences: 'Budget cannot align with goals (Â§157 requires relation). Minister may cite in management review Â§171-176.',
+      annualDate: 'January 31',
+      financialYear: true,
+      relatedSections: ['Â§157(1)(b.1)']
+    },
+    {
+      id: 11,
+      category: 'Financial',
+      section: 'Â§157',
+      title: 'Annual Budget Bylaw',
+      description: 'Budget bylaw outlining revenues/expenditures',
+      deadline: 'Before FY starts (by March 31 for April 1)',
+      frequency: 'Annual',
+      type: 'Financial',
+      priority: 'Critical',
+      responsible: 'Settlement Council',
+      action: 'Budget: MSGC allocations, settlement revenues, relation to business plan, capital vs operations, deficit recovery amount. Not subject to public meeting Â§55.1.',
+      consequences: 'No spending authority without budget. Limited to $100k basic operations Â§142(1)(b.1). Persistent failure: Ministerial intervention Â§176.',
+      annualDate: 'March 31',
+      financialYear: true,
+      relatedSections: ['Â§158', 'Â§158.1', 'Â§55.1', 'Â§142(1)(b.1)']
+    },
+    {
+      id: 12,
+      category: 'Financial',
+      section: 'Â§158.1',
+      title: 'Deficit Elimination',
+      description: 'Eliminate operating deficits within 3 years',
+      deadline: '3 budget years after deficit',
+      frequency: 'When deficit occurs',
+      type: 'Financial',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: 'If operations exceed revenues, budget surpluses/reductions in next 3 years to cover. Show recovery in budgets Â§157(1)(c)(iii).',
+      consequences: 'Deficits beyond 3 years violate MSA. Joint Review Committee Â§246.1 oversight, comptroller Â§178 possible.',
+      relatedSections: ['Â§176-178', 'Â§246.1']
+    },
+    {
+      id: 13,
+      category: 'Financial',
+      section: 'Â§159(1)',
+      title: 'Expenditure Authorization',
+      description: 'All payments properly authorized and documented',
+      deadline: 'Every payment',
+      frequency: 'Continuous',
+      type: 'Procedural',
+      priority: 'Critical',
+      responsible: 'Council & Administrator',
+      action: 'Payment requires: budget/resolution authority, Chair+Administrator signatures, Administrator certification of funds, goods/services received.',
+      consequences: 'Unauthorized expenditures ultra vires. Personal liability Â§177. Minister can order restitution Â§176-177 or inspection Â§160-162.',
+      relatedSections: ['Â§177', 'Â§160-162']
+    },
+    {
+      id: 14,
+      category: 'Financial',
+      section: 'Â§163',
+      title: 'Audited Financial Statements',
+      description: 'Annual audit of settlement fund',
+      deadline: 'ASAP after FY end; typically June-August completion',
+      frequency: 'Annual',
+      type: 'Financial',
+      priority: 'Critical',
+      responsible: 'Settlement Council',
+      action: 'Appoint qualified auditor. Complete audit. Present at AGM (within 180 days of year-end).',
+      consequences: 'Late/missing audits violate MSA. Minister may withhold funds, delay transfers, require inspection Â§160. AGM presentation breach Â§5.',
+      annualDate: 'June-August',
+      financialYear: true,
+      relatedSections: ['Â§5', 'Â§160']
+    },
+    {
+      id: 15,
+      category: 'Financial',
+      section: 'Â§159.1',
+      title: 'Standardized Financial Reports',
+      description: 'MSGC-format financial reports',
+      deadline: 'By September 30 for prior FY',
+      frequency: 'Annual',
+      type: 'Reporting',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: 'Prepare per MSGC Policy format. File with Minister and MSGC.',
+      consequences: 'Non-compliance noted. May trigger review Â§171. Persistent failure: Minister-ordered audits or public default reporting.',
+      annualDate: 'September 30',
+      financialYear: true,
+      relatedSections: ['Â§171-176']
+    },
+    {
+      id: 16,
+      category: 'Financial',
+      section: 'Â§159.2',
+      title: 'Councillor Expense Report',
+      description: 'Public report of councillor compensation',
+      deadline: 'By September 30 for prior FY',
+      frequency: 'Annual',
+      type: 'Reporting',
+      priority: 'Medium',
+      responsible: 'Settlement Council',
+      action: "List each councillor's remuneration and expenses per GAAP. Make public at AGM or on request.",
+      consequences: 'Transparency breach. Members/Minister can demand info. May be cited in review/audit.',
+      annualDate: 'September 30',
+      relatedSections: ['Â§11.1', 'Â§44(1)(h)']
+    },
+
+    // BYLAWS & LEGISLATION
+    {
+      id: 17,
+      category: 'Legislative',
+      section: 'Â§52',
+      title: 'Bylaw Three Readings',
+      description: '3 distinct readings required for bylaws',
+      deadline: 'Max 2 readings per meeting; all within 2 years',
+      frequency: 'Per bylaw',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: 'Each reading requires vote of quorum. Written bylaw required for 2nd/3rd reading. Max 2 readings same meeting.',
+      consequences: 'Bylaw has no effect without proper readings. Previous readings cancelled if not completed within 2 years Â§53.',
+      relatedSections: ['Â§53']
+    },
+    {
+      id: 18,
+      category: 'Legislative',
+      section: 'Â§54-55',
+      title: 'Public Meeting for Bylaws',
+      description: 'Public meeting between 2nd and 3rd reading',
+      deadline: 'â‰¥14 days public notice; meeting after 2nd, before 3rd reading',
+      frequency: 'Per bylaw',
+      type: 'Meeting',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: 'Hold public meeting. Quorum: 15 eligible members or bylaw-specified number. Majority approval needed.',
+      consequences: 'Bylaw defeated if majority vote against. Process invalid without proper public meeting. Exceptions: budget, remuneration, essential services Â§55.1.',
+      relatedSections: ['Â§55.1', 'Â§56']
+    },
+    {
+      id: 19,
+      category: 'Legislative',
+      section: 'Â§51.1',
+      title: 'Essential Services Bylaw',
+      description: 'Bylaw for water, sewage, roads fees',
+      deadline: 'Within 1 year of section force (2021 c12)',
+      frequency: 'One-time + updates',
+      type: 'Legislative',
+      priority: 'Critical',
+      responsible: 'Settlement Council',
+      action: 'Adopt bylaw with fees for: water distribution, sewage/waste, road maintenance. Separate fees for each service. Fees must cover costs, not exceed.',
+      consequences: 'Cannot legally charge for essential services without bylaw.',
+      relatedSections: ['Â§51', 'Â§55.1']
+    },
+    {
+      id: 20,
+      category: 'Legislative',
+      section: 'Â§44(1)',
+      title: 'Document Posting Requirement',
+      description: 'Post specified documents in settlement office',
+      deadline: 'â‰¥15 consecutive days (exceptions possible Â§44(2))',
+      frequency: 'Per document',
+      type: 'Documentation',
+      priority: 'Medium',
+      responsible: 'Settlement Administrator',
+      action: 'Post: agreements, proposed bylaws (after 2nd reading), reports, audited financials, minutes, enacted bylaws, business plans, remuneration reports.',
+      consequences: 'Transparency failure. Decisions may be challenged. Remuneration bylaws/reports mandatory posting Â§44(2.1).',
+      relatedSections: ['Â§44(2)-(4)']
+    },
+
+    // MEMBERSHIP MANAGEMENT
+    {
+      id: 21,
+      category: 'Membership',
+      section: 'Â§77-79',
+      title: 'Membership Application Review',
+      description: 'Process membership applications timely',
+      deadline: 'Consider within 90 days of receipt; decide within 45 days of consideration',
+      frequency: 'Per application',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: 'Give applicant notice of meeting date. Provide opportunity for evidence/hearing. Decide: approve, defer, refuse, approve with probation (â‰¤2 years).',
+      consequences: 'Refusal/inaction appealable to MSAT within 45 days Â§83. MSAT can order admission. Approval appealable by members (with MSAT permission).',
+      relatedSections: ['Â§83-84']
+    },
+    {
+      id: 22,
+      category: 'Membership',
+      section: 'Â§86',
+      title: 'Probationary Membership',
+      description: 'Manage probationary members (â‰¤2 year period)',
+      deadline: 'Termination before probation ends',
+      frequency: 'Per probationer',
+      type: 'Procedural',
+      priority: 'Medium',
+      responsible: 'Settlement Council',
+      action: 'May terminate by resolution if: no accommodation, or not committed to peaceful living. Give notice and hearing opportunity before decision.',
+      consequences: 'After probation, permanent status (only bylaw removal Â§87). Improper termination appealable within 30 days to MSAT. Send resolution to member and Minister.',
+      relatedSections: ['Â§87-89']
+    },
+    {
+      id: 23,
+      category: 'Membership',
+      section: 'Â§87',
+      title: 'Membership Termination Bylaw',
+      description: 'Terminate permanent member via bylaw',
+      deadline: 'â‰¥30 days notice before 1st reading; hearing if requested',
+      frequency: 'When grounds exist',
+      type: 'Legislative',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: 'Grounds: (a) abandoned settlement, or (b) absent 12+ months without reason. Give â‰¥30 days written notice of proposal. Hearing opportunity. Follow 3-reading process.',
+      consequences: 'Invalid without notice/grounds. Appealable to MSAT within 30 days. Send to Minister. If upheld: membership and land Â§95 terminated.',
+      relatedSections: ['Â§88-89', 'Â§95']
+    },
+    {
+      id: 24,
+      category: 'Membership',
+      section: 'Â§85',
+      title: 'Leaves of Absence',
+      description: 'Grant and track authorized leaves',
+      deadline: 'Annual written confirmation required',
+      frequency: 'Yearly per member on leave',
+      type: 'Procedural',
+      priority: 'Medium',
+      responsible: 'Member; Council',
+      action: 'Auto-qualify: MSGC/public service, education, medical, incarceration, military. Must maintain residence and send yearly letter affirming return intent. Council may grant other leaves.',
+      consequences: 'Without leave and annual confirmation, 12+ month absence = termination grounds Â§87. Leave protects status. On leave = deemed resident.',
+      relatedSections: ['Â§87']
+    },
+    {
+      id: 25,
+      category: 'Membership',
+      section: 'Â§93-94.1',
+      title: 'Expulsion Orders',
+      description: 'Expel non-members for unauthorized residence or just cause',
+      deadline: 'Hearing before order; 30-day appeal period',
+      frequency: 'As needed',
+      type: 'Procedural',
+      priority: 'Medium',
+      responsible: 'Settlement Council',
+      action: 'May expel for: just cause (bylaw violations, danger), or ineligibility. Give chance to explain before order. Set departure date.',
+      consequences: "Appeal to MSAT within 30 days (stayed during appeal). If upheld/no appeal: Court of King's Bench enforcement order Â§94.1. RCMP/sheriffs enforce.",
+      relatedSections: ['Â§92', 'Â§94']
+    },
+
+    // LAND MANAGEMENT
+    {
+      id: 26,
+      category: 'Land',
+      section: 'MSLR Reg Â§29(1)(g)',
+      title: 'Land Holding Cap',
+      description: 'Enforce max acreage: 175/settlement, 350 total',
+      deadline: 'At each transfer/grant',
+      frequency: 'Per transaction',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'MSLR Registrar',
+      action: 'MSLR system rejects transfers exceeding caps. Member must dispose of other land to acquire more.',
+      consequences: 'Over-cap transfers rejected. Cannot register until adjusted.',
+      relatedSections: ['MSGC Land Policy GC-1997-01 Â§3.4']
+    },
+    {
+      id: 27,
+      category: 'Land',
+      section: 'Â§106; AR 363/91',
+      title: 'Subdivision Approval',
+      description: 'Approval required to divide parcels',
+      deadline: 'Before partial transfer; Council decides within 90 days',
+      frequency: 'Per subdivision',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Settlement Council; Registrar',
+      action: 'Subdivision = transfer of part of parcel (>3 year term). Exception: lease â‰¤3 years. Submit application with survey.',
+      consequences: 'Unapproved subdivisions void. Registrar refuses registration. No legal title for occupants.',
+      relatedSections: ['AR 363/91 Â§Â§2-5']
+    },
+    {
+      id: 28,
+      category: 'Land',
+      section: 'MSLR Reg Â§79; Dower Act',
+      title: 'Spousal Consent (Dower)',
+      description: 'Spouse must consent to homestead disposition',
+      deadline: 'At time of transfer/mortgage',
+      frequency: 'Per homestead disposition',
+      type: 'Procedural',
+      priority: 'Critical',
+      responsible: 'Landowner; Registrar',
+      action: 'Married owner disposing homestead needs spouse written consent + commissioner acknowledgment. Or affidavit: not homestead or not married.',
+      consequences: 'Without consent: Registrar refuses registration. Transaction invalid. Spouse can void later. Damages possible.',
+      relatedSections: ['Dower Act (AB)']
+    },
+    {
+      id: 29,
+      category: 'Land',
+      section: 'MSLR Reg Â§92',
+      title: 'Estate Instructions Filing',
+      description: 'File will for settlement land succession',
+      deadline: 'Best upon land acquisition or family change',
+      frequency: 'As needed',
+      type: 'Documentation',
+      priority: 'Medium',
+      responsible: 'Individual Members',
+      action: 'File Estate Instructions with MSLR indicating land inheritance. Confidential until death. Land Trustee appointed per instructions.',
+      consequences: 'Without instructions: delayed succession, land sits idle. MSAT may appoint trustee. Non-member heirs cannot inherit Metis Title; settlement compensates estate and reassigns.',
+      relatedSections: ['MSGC Land Policy on Estates']
+    },
+
+    // MSGC & MINISTERIAL
+    {
+      id: 30,
+      category: 'MSGC',
+      section: 'Â§144-145',
+      title: 'Financial Allocation Policy',
+      description: 'MSGC policy distributing Consolidated Fund',
+      deadline: 'Before each fiscal year (April 1)',
+      frequency: 'Annual',
+      type: 'Policy',
+      priority: 'Critical',
+      responsible: 'MSGC (General Council)',
+      action: 'Policy states total funds and formula/amounts for each settlement and MSGC. May include requisition from settlements to fund MSGC.',
+      consequences: 'Without policy: settlements cannot receive funding. Minister may impose interim formula. Political disputes possible.',
+      financialYear: true,
+      relatedSections: ['Metis Settlements Accord 1990']
+    },
+    {
+      id: 31,
+      category: 'MSGC',
+      section: 'Â§142',
+      title: 'Consolidated Fund Payments',
+      description: 'Authorized payments from Consolidated Fund',
+      deadline: 'Annual funding cycle (quarterly transfers)',
+      frequency: 'Ongoing',
+      type: 'Financial',
+      priority: 'Critical',
+      responsible: 'MSGC Executive',
+      action: 'Part 1: pay per allocation policy, interim advances (â‰¤$100k), investments, error refunds, admin costs. Part 2: only per GCP. Deduct settlement debts.',
+      consequences: 'Unauthorized disbursements violate MSA. Auditors flag. Settlements can sue. Minister can withhold future funds or issue directives.',
+      relatedSections: ['Â§143']
+    },
+    {
+      id: 32,
+      category: 'MSGC',
+      section: 'Â§163(2)',
+      title: 'MSGC Fund Audit',
+      description: 'Annual audit of Consolidated Fund',
+      deadline: 'After March 31; mid-summer completion',
+      frequency: 'Annual',
+      type: 'Financial',
+      priority: 'Critical',
+      responsible: 'MSGC Executive',
+      action: 'MSGC appoints auditor for Consolidated Fund. Audit completed. Share with settlements and Minister. Include requisitioned fund transactions.',
+      consequences: 'No audit violates MSA, undermines confidence. Minister can order separate audit/investigation. Alberta may withhold next grant until compliance.',
+      annualDate: 'Mid-summer',
+      financialYear: true
+    },
+    {
+      id: 33,
+      category: 'Ministerial',
+      section: 'Â§224',
+      title: 'Ministerial Veto/Approval',
+      description: 'Minister veto window for certain GC Policies',
+      deadline: '90 days after policy submission',
+      frequency: 'Per policy',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Minister; MSGC',
+      action: 'MSGC submits new policies to Minister. 90-day veto window for specified areas (policing, health, education). Some need affirmative approval.',
+      consequences: 'Vetoed policy has no effect. Implementing vetoed policy invalid. Non-approved required policies unenforceable.',
+      relatedSections: ['Â§225-226', 'Â§55']
+    },
+    {
+      id: 34,
+      category: 'Ministerial',
+      section: 'Â§160-162',
+      title: 'Ministerial Audits/Investigations',
+      description: 'Minister oversight powers for audits',
+      deadline: "At Minister's discretion",
+      frequency: 'As needed',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Minister; Settlements/MSGC',
+      action: 'Minister may order audit/inspection of settlement/MSGC books, use of funds, bank accounts. Can seize records via court order. Officials must cooperate.',
+      consequences: 'Obstruction = offense/contempt. Non-cooperation risks funding withholding. Findings may lead to: councillor removal recommendations, Official Manager Â§31, or legislation.',
+      relatedSections: ['Â§31', 'Â§171-179']
+    },
+    {
+      id: 35,
+      category: 'Tribunal',
+      section: 'Â§213',
+      title: 'MSAT Funding & Appointments',
+      description: 'Maintain Appeal Tribunal roster and funding',
+      deadline: 'Ongoing; appointments as terms expire',
+      frequency: 'Continuous',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'MSGC; Minister',
+      action: 'MSGC funds MSAT via Consolidated Fund. â‰¥7 members: Chair (Minister after MSGC consult), members jointly appointed by MSGC/Minister. Collaborate on full roster.',
+      consequences: 'Insufficient tribunal capacity delays appeals (membership, land, elections, surface access). MSGC must ensure resources and training.',
+      relatedSections: ['Â§180-213']
+    },
+
+    // ADDITIONAL CRITICAL ITEMS
+    {
+      id: 36,
+      category: 'Governance',
+      section: 'Â§57-60',
+      title: 'Bylaw Petition Processing',
+      description: 'Process valid bylaw petitions from members',
+      deadline: 'Within 30 days: prepare bylaw, 1st/2nd reading. Public meeting within 30 days of 1st reading.',
+      frequency: 'Per valid petition',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Settlement Council',
+      action: 'Verify â‰¥20% member signatures (per census). Administrator determines sufficiency within 30 days. Prepare bylaw per petition subject, give readings, schedule public meeting.',
+      consequences: 'If defeated, can refuse similar petitions for 1 year. If approved at public meeting, pass bylaw within 30 days without alteration.',
+      relatedSections: ['Â§58-59']
+    },
+    {
+      id: 37,
+      category: 'Land',
+      section: 'Co-mgmt Agreement Schedule 3',
+      title: 'MSGC Co-Management (Minerals)',
+      description: 'Process for mineral development approvals',
+      deadline: 'Various per agreement stages',
+      frequency: 'Per resource project',
+      type: 'Procedural',
+      priority: 'Medium',
+      responsible: 'MSGC; Settlement Council; MSAT',
+      action: 'Posting requests reviewed by MSAC (42 days). Development agreements negotiated. Surface access via MSAT Land Access Panel if no agreement.',
+      consequences: 'Non-compliance jeopardizes revenue. Legal disputes. Companies can seek MSAT entry orders similar to Surface Rights Board.',
+      relatedSections: ['MSA Part 4, Â§111-129']
+    },
+    {
+      id: 38,
+      category: 'Governance',
+      section: 'Â§23',
+      title: 'Oath of Office',
+      description: 'All councillors take official oath before duties',
+      deadline: 'Before starting duties (at organizational meeting)',
+      frequency: 'Per councillor per term',
+      type: 'Procedural',
+      priority: 'Critical',
+      responsible: 'Individual Councillors',
+      action: 'Take official oath per Oaths of Office Act in writing. Give to Administrator for safekeeping.',
+      consequences: 'Cannot legally act as councillor without oath. Actions may be void.'
+    },
+    {
+      id: 39,
+      category: 'Tribunal',
+      section: 'APAGA Â§19; MSA Â§212',
+      title: 'MSAT Mandate Review',
+      description: '7-year review of MSAT operations and mandate',
+      deadline: 'Every 7 years (next due 2026)',
+      frequency: 'Every 7 years',
+      type: 'Review',
+      priority: 'High',
+      responsible: 'Minister of Indigenous Relations; MSAT',
+      action: "Conduct comprehensive review of MSAT's mandate, effectiveness, and operations. Prepare report for Executive Council. Consult with MSGC and settlements.",
+      consequences: 'Failure to conduct review may lead to loss of funding or legislative changes. Negative findings could result in restructuring or reduced authority.',
+      relatedSections: ['APAGA Â§20-22', 'MSA Â§201-213']
+    },
+    {
+      id: 40,
+      category: 'Tribunal',
+      section: 'Conflicts of Interest Act Â§23.922',
+      title: 'MSAT Code of Conduct',
+      description: 'Maintain and enforce ethical standards for tribunal members',
+      deadline: 'Ongoing; annual affirmation required',
+      frequency: 'Annual',
+      type: 'Compliance',
+      priority: 'High',
+      responsible: 'MSAT Chair; Ethics Commissioner',
+      action: 'Develop, implement, and enforce Code of Conduct covering conflicts of interest, impartiality, and disclosure requirements. File with Ethics Commissioner. Provide annual training.',
+      consequences: 'Non-compliance may result in investigations by Ethics Commissioner. Tribunal decisions could be challenged if ethical breaches occur.',
+      relatedSections: ['MSA Â§208', 'APAGA Â§13']
+    },
+    {
+      id: 41,
+      category: 'Transparency',
+      section: 'FOIP Act',
+      title: 'FOIP Compliance',
+      description: 'Respond to freedom of information requests',
+      deadline: 'Within 30 days of request (extensions possible)',
+      frequency: 'As requested',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Settlement Administrator; FOIP Coordinator',
+      action: 'Process access to information requests: log receipt, search for records, apply exemptions if applicable, provide response within timeline. Maintain privacy of personal information.',
+      consequences: 'Failure to respond may result in orders from Information and Privacy Commissioner. Potential fines or public reporting of non-compliance.',
+      relatedSections: ['MSA Â§44(1)', 'Local Authorities Election Act']
+    },
+    {
+      id: 42,
+      category: 'Oversight',
+      section: 'Ombudsman Act',
+      title: 'Ombudsman Cooperation',
+      description: 'Cooperate with Alberta Ombudsman investigations',
+      deadline: 'As requested by Ombudsman',
+      frequency: 'As needed',
+      type: 'Procedural',
+      priority: 'Medium',
+      responsible: 'Settlement Council; Administrator',
+      action: 'Respond to Ombudsman inquiries, provide requested documents, implement recommendations from investigations. Maintain internal complaint resolution processes.',
+      consequences: 'Non-cooperation may result in critical public reports. Potential for increased provincial oversight or legislative changes.',
+      relatedSections: ['MSA Â§171-176']
+    },
+    {
+      id: 43,
+      category: 'Tribunal',
+      section: 'APAGA Â§13-15',
+      title: 'Public Agency Governance',
+      description: 'Comply with public agency appointment and compensation rules',
+      deadline: 'Ongoing; at each appointment/renewal',
+      frequency: 'Continuous',
+      type: 'Compliance',
+      priority: 'High',
+      responsible: 'MSGC; Minister of Indigenous Relations',
+      action: 'Follow Public Agency Secretariat guidelines for MSAT appointments: public recruitment, merit-based selection, compensation within approved ranges. Maintain appointment records.',
+      consequences: 'Improper appointments may be invalidated. Could result in funding withholding or ministerial intervention.',
+      relatedSections: ['MSA Â§201-208']
+    },
+    {
+      id: 44,
+      category: 'Land',
+      section: 'Dower Act RSA 2000 c D-15',
+      title: 'Dower Rights Protection',
+      description: 'Protect spousal interests in homestead property',
+      deadline: 'At all homestead transactions',
+      frequency: 'Per transaction',
+      type: 'Legal',
+      priority: 'Critical',
+      responsible: 'MSLR Registrar; Landowners',
+      action: 'Verify spousal consent for all homestead dispositions. Maintain records of consents or affidavits. Provide information to members about dower rights.',
+      consequences: 'Transactions without proper consent are voidable. Spouses can challenge dispositions. Potential legal liability for settlement officials.',
+      relatedSections: ['MSLR Reg Â§79', 'MSA Â§106']
+    },
+    {
+      id: 45,
+      category: 'Financial',
+      section: 'MSA Â§142(2); APAGA Â§25',
+      title: 'Consolidated Fund Investment',
+      description: 'Prudent investment of settlement funds',
+      deadline: 'Ongoing monitoring',
+      frequency: 'Continuous',
+      type: 'Financial',
+      priority: 'High',
+      responsible: 'MSGC Treasurer; Settlement Councils',
+      action: 'Invest Consolidated Fund and settlement funds according to approved investment policies. Regularly review performance and risk. Report to members annually.',
+      consequences: 'Imprudent investments may result in financial losses. Could trigger ministerial intervention or legal action from members.',
+      relatedSections: ['MSA Â§143', 'MSA Â§159']
+    },
+    {
+      id: 46,
+      category: 'Governance',
+      section: 'MSA Â§233; LAEA',
+      title: 'Public Notice Requirements',
+      description: 'Proper notice for meetings and decisions',
+      deadline: 'As required by specific provisions (typically 7-30 days)',
+      frequency: 'Per requirement',
+      type: 'Procedural',
+      priority: 'High',
+      responsible: 'Settlement Administrator',
+      action: 'Provide written notice for: council meetings (when required), public meetings, bylaw readings, membership decisions, and other matters as specified in MSA. Post in settlement office and other required locations.',
+      consequences: 'Inadequate notice may invalidate decisions. Could result in successful appeals or legal challenges.',
+      relatedSections: ['Â§5(2)', 'Â§6(3)', 'Â§54']
+    },
+    {
+      id: 47,
+      category: 'Tribunal',
+      section: 'MSA Â§180-185',
+      title: 'MSAT Land Access Panel',
+      description: 'Surface access dispute resolution',
+      deadline: 'Within 60 days of application',
+      frequency: 'As needed',
+      type: 'Adjudication',
+      priority: 'Medium',
+      responsible: 'MSAT Land Access Panel',
+      action: 'Hear applications for surface access orders when settlement and industry cannot agree. Conduct hearings, issue orders with terms and conditions. Monitor compliance.',
+      consequences: "Delays may hinder resource development. Improper orders could be appealed to Court of King's Bench.",
+      relatedSections: ['MSA Â§111-129', 'Co-management Agreement']
+    },
+    {
+      id: 48,
+      category: 'Financial',
+      section: 'MSA Â§158; APAGA Â§26',
+      title: 'Financial Risk Management',
+      description: 'Identify and mitigate financial risks',
+      deadline: 'Annual review',
+      frequency: 'Annual',
+      type: 'Financial',
+      priority: 'High',
+      responsible: 'Settlement Council; MSGC',
+      action: 'Conduct annual financial risk assessment. Implement controls for major risks. Report significant risks to members and Minister. Maintain adequate insurance coverage.',
+      consequences: 'Failure to manage risks could lead to financial losses. May result in increased premiums or loss of insurance coverage.',
+      relatedSections: ['MSA Â§163', 'MSA Â§176']
+    },
+    {
+      id: 49,
+      category: 'Governance',
+      section: 'MSA Â§171-176',
+      title: 'Ministerial Review Response',
+      description: 'Respond to ministerial management reviews',
+      deadline: 'As specified in review notice',
+      frequency: 'As required',
+      type: 'Procedural',
+      priority: 'Critical',
+      responsible: 'Settlement Council; MSGC',
+      action: 'Cooperate fully with ministerial reviews. Provide requested documents and information. Implement recommended corrective actions within specified timelines.',
+      consequences: 'Non-cooperation may result in appointment of Official Manager or other intervention measures. Could lead to loss of local control.',
+      relatedSections: ['MSA Â§31', 'MSA Â§160-162']
+    },
+    {
+      id: 50,
+      category: 'Land',
+      section: 'MSLR Reg Â§35-40',
+      title: 'Land Registry Accuracy',
+      description: 'Maintain accurate land records',
+      deadline: 'Ongoing; updates within 30 days of changes',
+      frequency: 'Continuous',
+      type: 'Administrative',
+      priority: 'High',
+      responsible: 'MSLR Registrar; Settlement Administrator',
+      action: 'Ensure all land transactions are properly recorded. Verify accuracy of title documents. Conduct periodic audits of land records. Resolve discrepancies promptly.',
+      consequences: 'Inaccurate records may lead to ownership disputes. Could result in legal challenges or financial losses for affected members.',
+      relatedSections: ['MSA Â§106', 'MSA Â§110']
+    }
+  ];
+
+  const filterOptions = {
+    categories: ['all', 'Governance', 'Financial', 'Legislative', 'Membership', 'Land', 'MSGC', 'Ministerial', 'Tribunal', 'Transparency', 'Oversight'],
+    types: ['all', 'Meeting', 'Election', 'Procedural', 'Documentation', 'Financial', 'Planning', 'Reporting', 'Legislative', 'Notice', 'Review', 'Compliance', 'Adjudication', 'Administrative', 'Legal'],
+    parties: ['all', 'Settlement Council', 'Settlement Administrator', 'General Council', 'Appeal Tribunal', 'Settlement Chair', 'Applicant/Settlement Member', 'Occupier', 'Obligated Operator', 'Minister of Indigenous Relations', 'MSAT', 'MSLR Registrar', 'Ethics Commissioner', 'FOIP Coordinator', 'Public Agency Secretariat'],
+    priorities: ['all', 'Critical', 'High', 'Medium', 'Low']
+  };
+
+  // Local storage persistence
+  const STORAGE_KEY = 'msa_compliance_tracker_v1';
+  useEffect(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        setStatusMap(parsed.statusMap || {});
+        setNotesMap(parsed.notesMap || {});
+        setAuditLog(parsed.auditLog || []);
+        setAttachmentsMap(parsed.attachmentsMap || {});
+        setReminderList(parsed.reminderList || []);
+        setTheme(parsed.theme || 'light');
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const snapshot = {
+      statusMap,
+      notesMap,
+      auditLog,
+      attachmentsMap,
+      reminderList,
+      theme
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  }, [statusMap, notesMap, auditLog, attachmentsMap, reminderList, theme]);
+
+  // Role presets
+  useEffect(() => {
+    if (rolePreset === 'all') {
+      setFilterParty('all');
+    } else if (rolePreset === 'council') {
+      setFilterParty('Settlement Council');
+    } else if (rolePreset === 'administrator') {
+      setFilterParty('Settlement Administrator');
+    } else if (rolePreset === 'registrar') {
+      setFilterParty('MSLR Registrar');
+    } else if (rolePreset === 'msgc') {
+      setFilterParty('MSGC (General Council)');
+      // If MSGC Executive responsibilities appear separately, include them in filter logic below
+    } else if (rolePreset === 'msat') {
+      setFilterParty('MSAT');
+    } else if (rolePreset === 'minister') {
+      setFilterParty('Minister; MSGC');
+    }
+  }, [rolePreset]);
+
+  const filteredItems = useMemo(() => {
+    let items = complianceItems.filter(item => {
+      const matchesSearch =
+        searchTerm === '' ||
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.section.includes(searchTerm);
+
+      const matchesType = filterType === 'all' || item.type === filterType;
+      const matchesParty =
+        filterParty === 'all' ||
+        item.responsible === filterParty ||
+        // Include alternate matches for MSGC roles
+        (filterParty === 'MSGC (General Council)' && item.responsible && item.responsible.includes('MSGC')) ||
+        (filterParty === 'MSAT' && item.responsible && item.responsible.includes('MSAT')) ||
+        (filterParty === 'Minister; MSGC' && (item.category === 'Ministerial' || item.category === 'MSGC'));
+      const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
+      const matchesPriority = !showHighPriority || (showHighPriority && (item.priority === 'Critical' || item.priority === 'High'));
+
+      return matchesSearch && matchesType && matchesParty && matchesCategory && matchesPriority;
+    });
+
+    // Quick view filters
+    if (quickView === 'overdue') {
+      items = items.filter(i => statusMap[i.id] === 'Overdue');
+    } else if (quickView === 'completed') {
+      items = items.filter(i => statusMap[i.id] === 'Completed');
+    } else if (quickView === 'critical') {
+      items = items.filter(i => i.priority === 'Critical');
+    } else if (quickView === 'upcoming') {
+      // approximate upcoming: items with annualDate or cyclicDate
+      items = items.filter(i => i.annualDate || i.cyclicDate);
+    }
+
+    // Sorting
+    const dirMul = sortDir === 'asc' ? 1 : -1;
+    items.sort((a, b) => {
+      const v = (key) => {
+        if (key === 'priority') {
+          const rank = { Critical: 4, High: 3, Medium: 2, Low: 1 };
+          return rank[a.priority] - rank[b.priority];
+        } else if (key === 'title') {
+          return a.title.localeCompare(b.title);
+        } else if (key === 'category') {
+          return a.category.localeCompare(b.category);
+        } else if (key === 'type') {
+          return a.type.localeCompare(b.type);
+        } else if (key === 'deadline') {
+          return (a.deadline || '').localeCompare(b.deadline || '');
+        } else {
+          return 0;
+        }
+      };
+      return v(sortKey) * dirMul;
+    });
+
+    return items;
+  }, [
+    complianceItems,
+    searchTerm,
+    filterType,
+    filterParty,
+    filterCategory,
+    showHighPriority,
+    quickView,
+    sortKey,
+    sortDir,
+    statusMap
+  ]);
+
+  const getTypeColor = (type) => {
+    const colors = {
+      'Meeting': 'bg-blue-100 text-blue-800',
+      'Election': 'bg-purple-100 text-purple-800',
+      'Procedural': 'bg-green-100 text-green-800',
+      'Documentation': 'bg-yellow-100 text-yellow-800',
+      'Financial': 'bg-red-100 text-red-800',
+      'Planning': 'bg-indigo-100 text-indigo-800',
+      'Reporting': 'bg-orange-100 text-orange-800',
+      'Legislative': 'bg-pink-100 text-pink-800',
+      'Notice': 'bg-teal-100 text-teal-800',
+      'Review': 'bg-amber-100 text-amber-800',
+      'Compliance': 'bg-cyan-100 text-cyan-800',
+      'Adjudication': 'bg-violet-100 text-violet-800',
+      'Administrative': 'bg-lime-100 text-lime-800',
+      'Legal': 'bg-rose-100 text-rose-800'
+    };
+    return colors[type] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getPriorityIcon = (priority) => {
+    const icons = {
+      'Critical': <AlertTriangle className="w-4 h-4 text-red-500" />,
+      'High': <AlertCircle className="w-4 h-4 text-amber-500" />,
+      'Medium': <CheckCircle className="w-4 h-4 text-green-500" />,
+      'Low': <CheckCircle className="w-4 h-4 text-gray-500" />
+    };
+    return icons[priority] || null;
+  };
+
+  const getCategoryIcon = (category) => {
+    const icons = {
+      'Governance': <Building2 className="w-4 h-4" />,
+      'Financial': <Landmark className="w-4 h-4" />,
+      'Legislative': <ScrollText className="w-4 h-4" />,
+      'Membership': <Users className="w-4 h-4" />,
+      'Land': <Home className="w-4 h-4" />,
+      'MSGC': <Scale className="w-4 h-4" />,
+      'Ministerial': <Gavel className="w-4 h-4" />,
+      'Tribunal': <ShieldCheck className="w-4 h-4" />,
+      'Transparency': <BookOpen className="w-4 h-4" />,
+      'Oversight': <AlertCircle className="w-4 h-4" />
+    };
+    return icons[category] || <FileText className="w-4 h-4" />;
+  };
+
+  const getFrequencyIcon = (frequency) => {
+    if (!frequency) return <Clock className="w-4 h-4" />;
+    const f = frequency.toLowerCase();
+    if (f.includes('annual') || f.includes('year')) return <Calendar className="w-4 h-4" />;
+    if (f.includes('4 years') || f.includes('7 years')) return <Calendar className="w-4 h-4" />;
+    return <Clock className="w-4 h-4" />;
+  };
+
+  const getPriorityColor = (priority) => {
+    const colors = {
+      'Critical': 'border-red-500 bg-red-50',
+      'High': 'border-amber-500 bg-amber-50',
+      'Medium': 'border-green-500 bg-green-50',
+      'Low': 'border-gray-500 bg-gray-50'
+    };
+    return colors[priority] || 'border-gray-200 bg-gray-50';
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      'Pending': 'bg-gray-100 text-gray-800',
+      'In Progress': 'bg-blue-100 text-blue-800',
+      'Completed': 'bg-green-100 text-green-800',
+      'Overdue': 'bg-red-100 text-red-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const setStatus = (id, status) => {
+    setStatusMap(prev => ({ ...prev, [id]: status }));
+    setAuditLog(prev => [...prev, { ts: new Date().toISOString(), action: 'STATUS_UPDATE', itemId: id, details: status }]);
+  };
+
+  const setNote = (id, text) => {
+    setNotesMap(prev => ({ ...prev, [id]: text }));
+    setAuditLog(prev => [...prev, { ts: new Date().toISOString(), action: 'NOTE_UPDATE', itemId: id, details: text.slice(0, 100) }]);
+  };
+
+  const addAttachment = (id, file) => {
+    setAttachmentsMap(prev => {
+      const arr = prev[id] || [];
+      const next = [...arr, { name: file.name, size: file.size, type: file.type }];
+      return { ...prev, [id]: next };
+    });
+    setAuditLog(prev => [...prev, { ts: new Date().toISOString(), action: 'ATTACHMENT_ADD', itemId: id, details: file.name }]);
+  };
+
+  const removeAttachment = (id, index) => {
+    setAttachmentsMap(prev => {
+      const arr = prev[id] || [];
+      arr.splice(index, 1);
+      return { ...prev, [id]: [...arr] };
+    });
+    setAuditLog(prev => [...prev, { ts: new Date().toISOString(), action: 'ATTACHMENT_REMOVE', itemId: id, details: `index ${index}` }]);
+  };
+
+  const toggleCategoryCollapse = (cat) => {
+    setCollapsedCategories(prev => ({ ...prev, [cat]: !prev[cat] }));
+  };
+
+  const exportCSV = () => {
+    const headers = [
+      'id',
+      'category',
+      'section',
+      'title',
+      'description',
+      'deadline',
+      'frequency',
+      'type',
+      'priority',
+      'responsible',
+      'action',
+      'consequences',
+      'trigger',
+      'cyclicDate',
+      'annualDate',
+      'financialYear',
+      'relatedSections',
+      'status',
+      'notes'
+    ];
+    const rows = complianceItems.map(i => {
+      return [
+        i.id,
+        i.category,
+        i.section,
+        `"${i.title.replace(/"/g, '""')}"`,
+        `"${(i.description || '').replace(/"/g, '""')}"`,
+        `"${(i.deadline || '').replace(/"/g, '""')}"`,
+        i.frequency || '',
+        i.type || '',
+        i.priority || '',
+        `"${(i.responsible || '').replace(/"/g, '""')}"`,
+        `"${(i.action || '').replace(/"/g, '""')}"`,
+        `"${(i.consequences || '').replace(/"/g, '""')}"`,
+        `"${(i.trigger || '').replace(/"/g, '""')}"`,
+        i.cyclicDate || '',
+        i.annualDate || '',
+        i.financialYear ? 'true' : 'false',
+        `"${(i.relatedSections || []).join(';').replace(/"/g, '""')}"`,
+        statusMap[i.id] || 'Pending',
+        `"${(notesMap[i.id] || '').replace(/"/g, '""')}"`
+      ].join(',');
+    });
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, 'msa_compliance_export.csv');
+  };
+
+  const exportJSON = () => {
+    const payload = {
+      complianceItems,
+      statusMap,
+      notesMap,
+      auditLog,
+      attachmentsMap,
+      reminderList,
+      exportedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, 'msa_compliance_export.json');
+  };
+
+  const triggerDownload = (url, filename) => {
+    const linkEl = document.createElement('a');
+    linkEl.href = url;
+    linkEl.download = filename;
+    linkEl.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importFromJSON = (file) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (parsed.statusMap) setStatusMap(parsed.statusMap);
+        if (parsed.notesMap) setNotesMap(parsed.notesMap);
+        if (parsed.auditLog) setAuditLog(parsed.auditLog);
+        if (parsed.attachmentsMap) setAttachmentsMap(parsed.attachmentsMap);
+        if (parsed.reminderList) setReminderList(parsed.reminderList);
+        setImportModalOpen(false);
+      } catch (e) {
+        alert('Failed to import JSON.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const addReminder = (itemId, label, date) => {
+    setReminderList(prev => [...prev, { itemId, label, date }]);
+    setAuditLog(prev => [...prev, { ts: new Date().toISOString(), action: 'REMINDER_ADD', itemId, details: `${label} => ${date}` }]);
+  };
+
+  const removeReminder = (index) => {
+    setReminderList(prev => {
+      const copy = [...prev];
+      copy.splice(index, 1);
+      return copy;
+    });
+  };
+
+  const upcomingReminders = useMemo(() => {
+    const now = new Date();
+    return reminderList
+      .map(r => ({ ...r, d: new Date(r.date) }))
+      .filter(r => r.d >= now)
+      .sort((a, b) => a.d.getTime() - b.d.getTime());
+  }, [reminderList]);
+
+  const metrics = useMemo(() => {
+    const total = complianceItems.length;
+    const critical = complianceItems.filter(i => i.priority === 'Critical').length;
+    const high = complianceItems.filter(i => i.priority === 'High').length;
+    const medium = complianceItems.filter(i => i.priority === 'Medium').length;
+    const completed = Object.values(statusMap).filter(s => s === 'Completed').length;
+    const overdue = Object.values(statusMap).filter(s => s === 'Overdue').length;
+    const byCategory = complianceItems.reduce((acc, cur) => {
+      acc[cur.category] = (acc[cur.category] || 0) + 1;
+      return acc;
+    }, {});
+    const byType = complianceItems.reduce((acc, cur) => {
+      acc[cur.type] = (acc[cur.type] || 0) + 1;
+      return acc;
+    }, {});
+    const byResponsible = complianceItems.reduce((acc, cur) => {
+      acc[cur.responsible] = (acc[cur.responsible] || 0) + 1;
+      return acc;
+    }, {});
+    return {
+      total,
+      critical,
+      high,
+      medium,
+      completed,
+      overdue,
+      byCategory,
+      byType,
+      byResponsible
+    };
+  }, [complianceItems, statusMap]);
+
+  const printableRef = useRef(null);
+
+  const handlePrint = () => {
+    setPrintMode(true);
+    setTimeout(() => {
+      window.print();
+      setPrintMode(false);
+    }, 300);
+  };
+
+  // Calendar view helpers
+  const baseDate = useMemo(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + calendarMonthOffset, 1);
+    d.setDate(1);
+    return d;
+  }, [calendarMonthOffset]);
+
+  const daysInMonth = useMemo(() => {
+    const year = baseDate.getFullYear();
+    const month = baseDate.getMonth();
+    return new Date(year, month + 1, 0).getDate();
+  }, [baseDate]);
+
+  const firstDayIndex = useMemo(() => {
+    const d = new Date(baseDate);
+    return d.getDay(); // 0 Sunday
+  }, [baseDate]);
+
+  const themeClasses = theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900';
+  const cardClasses = theme === 'dark' ? 'bg-gray-800 border-gray-700 shadow' : 'bg-white border-gray-200 shadow';
+
+  // UI Components defined inline for a single-file app
+
+  const Header = () => (
+    <div className={`${cardClasses} rounded-lg p-6 mb-6 border`}>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">MÃ©tis Settlements Comprehensive Compliance Tracker (2025)</h1>
+          <p className="text-gray-500 mt-1">
+            Track deadlines, requirements, and obligations under the MÃ©tis Settlements Act and associated legislation
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+            onClick={() => setExportModalOpen(true)}
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
+          <button
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700"
+            onClick={() => setImportModalOpen(true)}
+          >
+            <Upload className="w-4 h-4" />
+            Import
+          </button>
+          <button
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200"
+            onClick={handlePrint}
+          >
+            <Printer className="w-4 h-4" />
+            Print
+          </button>
+          <button
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200"
+            onClick={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
+            title="Toggle theme"
+          >
+            <Sparkles className="w-4 h-4" />
+            {theme === 'dark' ? 'Light' : 'Dark'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const Controls = () => (
+    <div className={`${cardClasses} rounded-lg p-6 mb-6 border`}>
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search requirements..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+              theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+            }`}
+          />
+        </div>
+
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none ${
+              theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+            }`}
+          >
+            {filterOptions.categories.map(category => (
+              <option key={category} value={category}>
+                {category === 'all' ? 'All Categories' : category}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="relative">
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none ${
+              theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+            }`}
+          >
+            {filterOptions.types.map(type => (
+              <option key={type} value={type}>
+                {type === 'all' ? 'All Types' : type}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="relative">
+          <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <select
+            value={filterParty}
+            onChange={(e) => setFilterParty(e.target.value)}
+            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none ${
+              theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'
+            }`}
+          >
+            {filterOptions.parties.map(party => (
+              <option key={party} value={party}>
+                {party === 'all' ? 'All Parties' : party}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="relative">
+          <ListChecks className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <div className={`w-full pl-10 pr-4 py-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}>
+            <label className="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showHighPriority}
+                onChange={() => setShowHighPriority(!showHighPriority)}
+                className="sr-only peer"
+              />
+              <div className="relative w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-blue-600">
+                <div className="absolute top-[2px] left-[2px] h-5 w-5 bg-white rounded-full transition-all peer-checked:translate-x-full"></div>
+              </div>
+              <span className="ms-3 text-sm font-medium">High Priority Only</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="text-sm text-gray-500">
+          Showing {filteredItems.length} of {complianceItems.length} requirements
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            className={`px-3 py-1 rounded-lg ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+            onClick={() => setViewMode('grid')}
+          >
+            Grid
+          </button>
+          <button
+            className={`px-3 py-1 rounded-lg ${viewMode === 'table' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+            onClick={() => setViewMode('table')}
+          >
+            Table
+          </button>
+          <button
+            className={`px-3 py-1 rounded-lg ${viewMode === 'timeline' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+            onClick={() => setViewMode('timeline')}
+          >
+            Timeline
+          </button>
+          <button
+            className={`px-3 py-1 rounded-lg ${viewMode === 'calendar' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+            onClick={() => setViewMode('calendar')}
+          >
+            Calendar
+          </button>
+          <button
+            className={`px-3 py-1 rounded-lg ${viewMode === 'dashboard' ? 'bg-blue-600 text-white' : 'bg-gray-100'}`}
+            onClick={() => setViewMode('dashboard')}
+          >
+            Dashboard
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">Role preset:</span>
+          <select
+            value={rolePreset}
+            onChange={(e) => setRolePreset(e.target.value)}
+            className={`px-2 py-1 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+          >
+            <option value="all">All</option>
+            <option value="council">Settlement Council</option>
+            <option value="administrator">Administrator</option>
+            <option value="registrar">MSLR Registrar</option>
+            <option value="msgc">MSGC</option>
+            <option value="msat">MSAT</option>
+            <option value="minister">Minister</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">Quick view:</span>
+          <select
+            value={quickView}
+            onChange={(e) => setQuickView(e.target.value)}
+            className={`px-2 py-1 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+          >
+            <option value="all">All</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="overdue">Overdue</option>
+            <option value="completed">Completed</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">Sort by:</span>
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value)}
+            className={`px-2 py-1 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+          >
+            <option value="priority">Priority</option>
+            <option value="title">Title</option>
+            <option value="category">Category</option>
+            <option value="deadline">Deadline</option>
+            <option value="type">Type</option>
+          </select>
+          <select
+            value={sortDir}
+            onChange={(e) => setSortDir(e.target.value)}
+            className={`px-2 py-1 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+          >
+            <option value="asc">Asc</option>
+            <option value="desc">Desc</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+
+  const Legend = () => (
+    <div className={`${cardClasses} rounded-lg p-4 mb-6 border`}>
+      <div className="flex flex-wrap gap-4">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <span className="text-sm">Critical Priority</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+          <span className="text-sm">High Priority</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <span className="text-sm">Medium Priority</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-gray-500" />
+          <span className="text-sm">Annual/Cyclic Deadline</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <FileText className="w-4 h-4 text-gray-500" />
+          <span className="text-sm">Financial Year Related</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-500" />
+          <span className="text-sm">Completed Status</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-500" />
+          <span className="text-sm">Overdue Status</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ItemCard = ({ item }) => {
+    const currentStatus = statusMap[item.id] || 'Pending';
+    return (
+      <div
+        onClick={() => setSelectedItem(item)}
+        className={`rounded-lg p-6 cursor-pointer hover:shadow-lg transition-shadow border-l-4 ${getPriorityColor(item.priority)} ${cardClasses}`}
+      >
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className={`text-xs font-mono ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'} px-2 py-1 rounded`}>
+                Â§ {item.section}
+              </span>
+              <span className={`text-xs px-2 py-1 rounded font-medium ${getTypeColor(item.type)}`}>
+                {item.type}
+              </span>
+              {item.priority && getPriorityIcon(item.priority)}
+              <span className={`text-xs px-2 py-1 rounded font-medium border ${getStatusColor(currentStatus)} ml-2`}>
+                {currentStatus}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              {getCategoryIcon(item.category)}
+              <h3 className="text-lg font-semibold">{item.title}</h3>
+            </div>
+            <p className="text-sm text-gray-500 mb-3">{item.description}</p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                setStatus(item.id, 'In Progress');
+              }}
+            >
+              Mark In Progress
+            </button>
+            <button
+              className="text-xs px-2 py-1 rounded bg-green-100 hover:bg-green-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                setStatus(item.id, 'Completed');
+              }}
+            >
+              Mark Completed
+            </button>
+            <button
+              className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                setStatus(item.id, 'Overdue');
+              }}
+            >
+              Mark Overdue
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-start gap-2 text-sm">
+            <Clock className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <span className="font-medium">Deadline:</span>
+              <span className="text-gray-600 ml-1">{item.deadline}</span>
+            </div>
+          </div>
+
+          {item.frequency && (
+            <div className="flex items-start gap-2 text-sm">
+              {getFrequencyIcon(item.frequency)}
+              <div>
+                <span className="font-medium">Frequency:</span>
+                <span className="text-gray-600 ml-1">{item.frequency}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-start gap-2 text-sm">
+            <Users className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <span className="font-medium">Responsible:</span>
+              <span className="text-gray-600 ml-1">{item.responsible}</span>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 text-sm">
+            <span className={`w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0 ${getPriorityColor(item.priority).replace('border-', 'text-').replace('bg-', '')}`}>
+              {getPriorityIcon(item.priority)}
+            </span>
+            <div>
+              <span className="font-medium">Priority:</span>
+              <span className={`ml-1 font-medium ${getPriorityColor(item.priority).replace('border-', 'text-').replace('bg-', '')}`}>
+                {item.priority}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3">
+          <div className="flex items-center gap-2">
+            <Edit className="w-4 h-4 text-gray-400" />
+            <span className="text-xs text-gray-500">
+              Notes:
+            </span>
+          </div>
+          <textarea
+            value={notesMap[item.id] || ''}
+            onChange={(e) => setNote(item.id, e.target.value)}
+            placeholder="Add notes, decisions, contacts, or next steps..."
+            className={`mt-1 w-full text-sm border rounded p-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+          />
+          <div className="mt-2 flex items-center gap-2">
+            <BellRing className="w-4 h-4 text-gray-400" />
+            <button
+              className="text-xs px-2 py-1 rounded bg-blue-50 hover:bg-blue-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                const label = `Reminder: ${item.title}`;
+                const date = prompt('Enter reminder date (YYYY-MM-DD):');
+                if (date) {
+                  addReminder(item.id, label, date);
+                }
+              }}
+            >
+              Add reminder
+            </button>
+            <label className="text-xs px-2 py-1 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer">
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) addAttachment(item.id, file);
+                  e.target.value = '';
+                }}
+              />
+              Attach file
+            </label>
+          </div>
+          {attachmentsMap[item.id] && attachmentsMap[item.id].length > 0 && (
+            <div className="mt-2">
+              <div className="text-xs text-gray-500">Attachments:</div>
+              <ul className="mt-1 space-y-1">
+                {attachmentsMap[item.id].map((att, idx) => (
+                  <li key={idx} className="flex items-center justify-between text-xs bg-gray-50 rounded p-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-3 h-3 text-gray-400" />
+                      <span className="font-medium">{att.name}</span>
+                      <span className="text-gray-400">{(att.size / 1024).toFixed(1)} KB</span>
+                    </div>
+                    <button
+                      className="text-red-600 hover:underline"
+                      onClick={() => removeAttachment(item.id, idx)}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const ResultsGrid = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {filteredItems.map(item => (
+        <ItemCard key={item.id} item={item} />
+      ))}
+    </div>
+  );
+
+  const ResultsTable = () => (
+    <div className={`${cardClasses} rounded-lg p-4 border`}>
+      <div className="overflow-auto">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="text-left py-2 px-2">Title</th>
+              <th className="text-left py-2 px-2">Category</th>
+              <th className="text-left py-2 px-2">Type</th>
+              <th className="text-left py-2 px-2">Priority</th>
+              <th className="text-left py-2 px-2">Responsible</th>
+              <th className="text-left py-2 px-2">Deadline</th>
+              <th className="text-left py-2 px-2">Status</th>
+              <th className="text-left py-2 px-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredItems.map(item => (
+              <tr key={item.id} className="border-b hover:bg-gray-50">
+                <td className="py-2 px-2">
+                  <button className="text-blue-600 hover:underline" onClick={() => setSelectedItem(item)}>
+                    {item.title}
+                  </button>
+                  <div className="text-xs text-gray-400">Â§ {item.section}</div>
+                </td>
+                <td className="py-2 px-2">{item.category}</td>
+                <td className="py-2 px-2">{item.type}</td>
+                <td className="py-2 px-2">{item.priority}</td>
+                <td className="py-2 px-2">{item.responsible}</td>
+                <td className="py-2 px-2">{item.deadline}</td>
+                <td className="py-2 px-2">
+                  <span className={`px-2 py-1 rounded ${getStatusColor(statusMap[item.id] || 'Pending')}`}>
+                    {statusMap[item.id] || 'Pending'}
+                  </span>
+                </td>
+                <td className="py-2 px-2">
+                  <div className="flex gap-1">
+                    <button className="text-xs px-2 py-1 rounded bg-blue-100" onClick={() => setStatus(item.id, 'In Progress')}>Start</button>
+                    <button className="text-xs px-2 py-1 rounded bg-green-100" onClick={() => setStatus(item.id, 'Completed')}>Complete</button>
+                    <button className="text-xs px-2 py-1 rounded bg-red-100" onClick={() => setStatus(item.id, 'Overdue')}>Overdue</button>
+                    <button className="text-xs px-2 py-1 rounded bg-gray-100" onClick={() => setNote(item.id, '')}>Clear Notes</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {filteredItems.length === 0 && (
+              <tr>
+                <td colSpan={8} className="py-8 text-center text-gray-500">
+                  No requirements found. Try adjusting your search or filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const DetailModal = () => {
+    if (!selectedItem) return null;
+    const item = selectedItem;
+    const currentStatus = statusMap[item.id] || 'Pending';
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedItem(null)}>
+        <div className={`${cardClasses} rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border`} onClick={(e) => e.stopPropagation()}>
+          <div className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-sm font-mono ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'} px-2 py-1 rounded`}>
+                    Section {item.section}
+                  </span>
+                  <span className={`text-sm px-2 py-1 rounded font-medium ${getTypeColor(item.type)}`}>
+                    {item.type}
+                  </span>
+                  <span className={`text-sm px-2 py-1 rounded font-medium ${getPriorityColor(item.priority)}`}>
+                    {item.priority} Priority
+                  </span>
+                  <span className={`text-sm px-2 py-1 rounded font-medium border ${getStatusColor(currentStatus)}`}>
+                    {currentStatus}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  {getCategoryIcon(item.category)}
+                  <h2 className="text-2xl font-bold">{item.title}</h2>
+                </div>
+              </div>
+              <button onClick={() => setSelectedItem(null)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-1">Description</h3>
+                  <p className="text-gray-500">{item.description}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Legal basis</h3>
+                  <p className="text-gray-500">{item.section}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Responsible party</h3>
+                  <p className="text-gray-500">{item.responsible}</p>
+                </div>
+                {item.trigger && (
+                  <div>
+                    <h3 className="font-semibold mb-1">Trigger event</h3>
+                    <p className="text-gray-500">{item.trigger}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-1">Deadline</h3>
+                  <p className="text-gray-500">{item.deadline}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Frequency</h3>
+                  <p className="text-gray-500">{item.frequency}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Required action</h3>
+                  <p className="text-gray-500">{item.action}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Consequences of non-compliance</h3>
+                  <p className="text-red-600">{item.consequences}</p>
+                </div>
+              </div>
+            </div>
+
+            {item.relatedSections && (
+              <div className="mt-4">
+                <h3 className="font-semibold mb-1">Related legal sections</h3>
+                <div className="flex flex-wrap gap-2">
+                  {item.relatedSections.map((section, index) => (
+                    <span key={index} className={`text-sm font-mono ${theme === 'dark' ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'} px-2 py-1 rounded`}>
+                      {section}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {item.annualDate && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-blue-800">
+                    <Calendar className="w-5 h-5" />
+                    <div>
+                      <span className="font-semibold">Annual deadline</span>
+                      <div className="text-sm">{item.annualDate}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {item.financialYear && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-green-800">
+                    <FileText className="w-5 h-5" />
+                    <div>
+                      <span className="font-semibold">Financial year</span>
+                      <div className="text-sm">April 1 - March 31</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {item.cyclicDate && (
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-purple-800">
+                    <Calendar className="w-5 h-5" />
+                    <div>
+                      <span className="font-semibold">Cyclic deadline</span>
+                      <div className="text-sm">{item.cyclicDate}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold mb-1">Notes</h3>
+                <textarea
+                  value={notesMap[item.id] || ''}
+                  onChange={(e) => setNote(item.id, e.target.value)}
+                  placeholder="Add notes or decisions..."
+                  className={`w-full text-sm border rounded p-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+                />
+                <div className="mt-2 flex gap-2">
+                  <button
+                    className="text-xs px-2 py-1 rounded bg-green-100 hover:bg-green-200"
+                    onClick={() => setStatus(item.id, 'Completed')}
+                  >
+                    Mark Completed
+                  </button>
+                  <button
+                    className="text-xs px-2 py-1 rounded bg-blue-100 hover:bg-blue-200"
+                    onClick={() => setStatus(item.id, 'In Progress')}
+                  >
+                    Mark In Progress
+                  </button>
+                  <button
+                    className="text-xs px-2 py-1 rounded bg-red-100 hover:bg-red-200"
+                    onClick={() => setStatus(item.id, 'Overdue')}
+                  >
+                    Mark Overdue
+                  </button>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">Reminders & attachments</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <Bell className="w-4 h-4 text-gray-400" />
+                  <button
+                    className="text-xs px-2 py-1 rounded bg-blue-50 hover:bg-blue-100"
+                    onClick={() => {
+                      const label = prompt('Reminder label:', `Reminder: ${item.title}`);
+                      const date = prompt('Reminder date (YYYY-MM-DD):', '');
+                      if (label && date) addReminder(item.id, label, date);
+                    }}
+                  >
+                    Add reminder
+                  </button>
+                  <label className="text-xs px-2 py-1 rounded bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) addAttachment(item.id, file);
+                        e.target.value = '';
+                      }}
+                    />
+                    Attach file
+                  </label>
+                </div>
+                {attachmentsMap[item.id] && attachmentsMap[item.id].length > 0 && (
+                  <div className="mt-2">
+                    <div className="text-xs text-gray-500">Attachments:</div>
+                    <ul className="mt-1 space-y-1">
+                      {attachmentsMap[item.id].map((att, idx) => (
+                        <li key={idx} className="flex items-center justify-between text-xs bg-gray-50 rounded p-2">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-3 h-3 text-gray-400" />
+                            <span className="font-medium">{att.name}</span>
+                            <span className="text-gray-400">{(att.size / 1024).toFixed(1)} KB</span>
+                          </div>
+                          <button
+                            className="text-red-600 hover:underline"
+                            onClick={() => removeAttachment(item.id, idx)}
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedItem(null)}
+                    className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => {
+                      // add a reminder for next annual deadline if present
+                      if (item.annualDate) {
+                        addReminder(item.id, `Annual: ${item.title}`, `${new Date().getFullYear()}-${normalizeAnnualDate(item.annualDate)}`);
+                        alert('Annual reminder added.');
+                      } else {
+                        alert('No annual date available for this item.');
+                      }
+                    }}
+                    className="px-3 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+                  >
+                    Add annual reminder
+                  </button>
+                </div>
+                <div className="text-xs text-gray-400">
+                  Item ID: {item.id}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const normalizeAnnualDate = (annualDate) => {
+    // Convert "September 30" to "09-30" etc. Best effort only.
+    const months = {
+      january: '01',
+      february: '02',
+      march: '03',
+      april: '04',
+      may: '05',
+      june: '06',
+      july: '07',
+      august: '08',
+      september: '09',
+      october: '10',
+      november: '11',
+      december: '12'
+    };
+    const parts = annualDate.split(' ');
+    if (parts.length >= 2) {
+      const m = (months[parts[0].toLowerCase()] || '01');
+      const dRaw = parts[1].replace(/[^0-9]/g, '');
+      const d = dRaw.padStart(2, '0');
+      return `${m}-${d}`;
+    }
+    // e.g., "June-August" fallback => 06-30
+    return '06-30';
+  };
+
+  const Dashboard = () => (
+    <div className={`${cardClasses} rounded-lg p-6 mb-6 border`}>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Dashboard</h2>
+        <button
+          className="inline-flex items-center gap-2 px-2 py-1 rounded bg-gray-100 hover:bg-gray-200"
+          onClick={() => setDashboardExpanded(exp => !exp)}
+        >
+          {dashboardExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          {dashboardExpanded ? 'Collapse' : 'Expand'}
+        </button>
+      </div>
+
+      {dashboardExpanded && (
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <StatCard icon={<ClipboardList className="w-6 h-6 text-blue-500" />} label="Total items" value={metrics.total} />
+          <StatCard icon={<AlertTriangle className="w-6 h-6 text-red-500" />} label="Critical" value={metrics.critical} />
+          <StatCard icon={<AlertCircle className="w-6 h-6 text-amber-500" />} label="High" value={metrics.high} />
+          <StatCard icon={<CheckCircle className="w-6 h-6 text-green-500" />} label="Completed" value={metrics.completed} />
+        </div>
+      )}
+
+      {dashboardExpanded && (
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className={`${cardClasses} rounded-lg p-4 border`}>
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <BarChart2 className="w-4 h-4" /> Items by category
+            </h3>
+            <BarChart data={metrics.byCategory} />
+          </div>
+          <div className={`${cardClasses} rounded-lg p-4 border`}>
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <PieChart className="w-4 h-4" /> Items by type
+            </h3>
+            <PieChartView data={metrics.byType} />
+          </div>
+          <div className={`${cardClasses} rounded-lg p-4 border`}>
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <Bell className="w-4 h-4" /> Upcoming reminders
+            </h3>
+            <ReminderListView reminders={upcomingReminders} items={complianceItems} onRemove={removeReminder} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const StatCard = ({ icon, label, value }) => (
+    <div className={`${cardClasses} rounded-lg p-4 border flex items-center gap-4`}>
+      <div className="p-2 rounded bg-gray-100">{icon}</div>
+      <div>
+        <div className="text-sm text-gray-500">{label}</div>
+        <div className="text-2xl font-bold">{value}</div>
+      </div>
+    </div>
+  );
+
+  const BarChart = ({ data }) => {
+    const entries = Object.entries(data);
+    const max = Math.max(...entries.map(([, v]) => v), 1);
+    const width = 400;
+    const height = 160;
+    const barWidth = Math.max(12, Math.floor((width - 40) / entries.length) - 8);
+    return (
+      <svg width={width} height={height}>
+        {entries.map(([label, value], idx) => {
+          const x = 20 + idx * (barWidth + 8);
+          const barHeight = Math.floor((value / max) * (height - 40));
+          const y = height - 20 - barHeight;
+          return (
+            <g key={label}>
+              <rect x={x} y={y} width={barWidth} height={barHeight} fill="#4f46e5" opacity="0.8" />
+              <text x={x + barWidth / 2} y={height - 5} textAnchor="middle" fontSize="10" fill="#6b7280">{label}</text>
+              <text x={x + barWidth / 2} y={y - 4} textAnchor="middle" fontSize="10" fill="#374151">{value}</text>
+            </g>
+          );
+        })}
+        <line x1="20" y1={height - 20} x2={width - 20} y2={height - 20} stroke="#9ca3af" strokeWidth="1" />
+      </svg>
+    );
+  };
+
+  const PieChartView = ({ data }) => {
+    const entries = Object.entries(data);
+    const total = entries.reduce((sum, [, v]) => sum + v, 0) || 1;
+    const radius = 70;
+    const cx = 100;
+    const cy = 90;
+    let startAngle = 0;
+    const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#6366f1', '#f43f5e', '#06b6d4', '#84cc16', '#22c55e', '#eab308', '#8b5cf6', '#a855f7'];
+    return (
+      <div className="flex items-center gap-4">
+        <svg width={220} height={180}>
+          {entries.map(([label, value], idx) => {
+            const angle = (value / total) * Math.PI * 2;
+            const endAngle = startAngle + angle;
+            const x1 = cx + radius * Math.cos(startAngle);
+            const y1 = cy + radius * Math.sin(startAngle);
+            const x2 = cx + radius * Math.cos(endAngle);
+            const y2 = cy + radius * Math.sin(endAngle);
+            const largeArc = angle > Math.PI ? 1 : 0;
+            const pathData = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+            startAngle = endAngle;
+            return <path key={label} d={pathData} fill={colors[idx % colors.length]} opacity="0.85" stroke="#fff" strokeWidth="1" />;
+          })}
+          <circle cx={cx} cy={cy} r={40} fill="#fff" opacity="0.85" />
+          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="12" fill="#374151">
+            Total {total}
+          </text>
+        </svg>
+        <div className="text-xs space-y-1">
+          {entries.map(([label, value], idx) => (
+            <div key={label} className="flex items-center gap-2">
+              <span className="inline-block w-3 h-3 rounded" style={{ backgroundColor: colors[idx % colors.length] }}></span>
+              <span className="text-gray-700">{label}:</span>
+              <span className="font-medium">{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const ReminderListView = ({ reminders, items, onRemove }) => (
+    <ul className="text-sm space-y-2">
+      {reminders.length === 0 && <li className="text-gray-500">No upcoming reminders</li>}
+      {reminders.map((r, idx) => {
+        const item = items.find(i => i.id === r.itemId);
+        return (
+          <li key={`${r.itemId}-${idx}`} className="flex items-center justify-between bg-gray-50 rounded p-2">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4 text-gray-400" />
+              <div>
+                <div className="font-medium">{r.label}</div>
+                <div className="text-xs text-gray-500">{item ? item.title : `Item #${r.itemId}`} â€” {new Date(r.date).toDateString()}</div>
+              </div>
+            </div>
+            <button className="text-red-600 text-xs hover:underline" onClick={() => onRemove(idx)}>Remove</button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+
+  const TimelineView = () => {
+    const groups = groupByCategory(filteredItems);
+    return (
+      <div className={`${cardClasses} rounded-lg p-4 border`}>
+        {Object.keys(groups).map(cat => {
+          const collapsed = !!collapsedCategories[cat];
+          return (
+            <div key={cat} className="mb-6">
+              <button
+                className="flex items-center gap-2 text-lg font-semibold mb-2"
+                onClick={() => toggleCategoryCollapse(cat)}
+              >
+                {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                {cat}
+              </button>
+              {!collapsed && (
+                <div className="relative">
+                  <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                  <ul className="space-y-4 pl-8">
+                    {groups[cat].map(item => (
+                      <li key={item.id} className="relative">
+                        <div className="absolute left-0 top-2 w-4 h-4 rounded-full bg-blue-500"></div>
+                        <div className={`${cardClasses} rounded p-3 border hover:shadow cursor-pointer`} onClick={() => setSelectedItem(item)}>
+                          <div className="flex items-center justify-between">
+                            <div className="font-semibold">{item.title}</div>
+                            <div className="text-xs text-gray-500">Â§ {item.section}</div>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {item.deadline} â€” {item.frequency || 'One-time'}
+                          </div>
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className={`text-xs px-2 py-1 rounded ${getTypeColor(item.type)}`}>{item.type}</span>
+                            <span className={`text-xs px-2 py-1 rounded border ${getStatusColor(statusMap[item.id] || 'Pending')}`}>{statusMap[item.id] || 'Pending'}</span>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const CalendarView = () => {
+    const year = baseDate.getFullYear();
+    const month = baseDate.getMonth();
+    const weeks = [];
+    let dayCounter = 1 - firstDayIndex;
+    for (let w = 0; w < 6; w++) {
+      const week = [];
+      for (let d = 0; d < 7; d++) {
+        week.push(dayCounter);
+        dayCounter++;
+      }
+      weeks.push(week);
+    }
+
+    const itemsWithAnnualDates = filteredItems.filter(i => i.annualDate);
+    const itemsWithCyclicDates = filteredItems.filter(i => i.cyclicDate);
+
+    const isDateMatch = (i, dateDay) => {
+      if (dateDay <= 0 || dateDay > daysInMonth) return false;
+      const strDay = dateDay.toString();
+      // naive match based on day number present in annualDate or cyclicDate string
+      const dayMatchedAnnual = i.annualDate && i.annualDate.includes(strDay);
+      const dayMatchedCyclic = i.cyclicDate && i.cyclicDate.includes(strDay);
+      return dayMatchedAnnual || dayMatchedCyclic;
+    };
+
+    const prevMonth = () => setCalendarMonthOffset(o => o - 1);
+    const nextMonth = () => setCalendarMonthOffset(o => o + 1);
+
+    return (
+      <div className={`${cardClasses} rounded-lg p-4 border`}>
+        <div className="flex items-center justify-between mb-4">
+          <button className="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" onClick={prevMonth}>
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="font-semibold">
+            {baseDate.toLocaleString('default', { month: 'long' })} {year}
+          </div>
+          <button className="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" onClick={nextMonth}>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 gap-2">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+            <div key={d} className="text-xs font-medium text-gray-500 text-center">{d}</div>
+          ))}
+          {weeks.map((week, wIdx) => (
+            week.map((day, dIdx) => {
+              const inMonth = day > 0 && day <= daysInMonth;
+              const matchedItems = filteredItems.filter(i => isDateMatch(i, day));
+              return (
+                <div key={`${wIdx}-${dIdx}`} className={`rounded border min-h-[80px] p-1 ${inMonth ? 'bg-gray-50' : 'bg-gray-100'} ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                  <div className="text-xs font-medium">{inMonth ? day : ''}</div>
+                  <div className="mt-1 space-y-1">
+                    {matchedItems.slice(0, 3).map(mi => (
+                      <div
+                        key={mi.id}
+                        className="text-[11px] px-1 py-0.5 rounded bg-blue-100 text-blue-800 cursor-pointer"
+                        onClick={() => setSelectedItem(mi)}
+                      >
+                        {mi.title.slice(0, 20)}{mi.title.length > 20 ? 'â€¦' : ''}
+                      </div>
+                    ))}
+                    {matchedItems.length > 3 && (
+                      <div className="text-[11px] text-gray-400">+{matchedItems.length - 3} more</div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          ))}
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={`${cardClasses} rounded p-3 border`}>
+            <h4 className="font-semibold mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4" /> Annual deadlines
+            </h4>
+            <ul className="text-sm space-y-1">
+              {itemsWithAnnualDates.map(i => (
+                <li key={i.id} className="flex items-center justify-between">
+                  <button className="text-blue-600 hover:underline" onClick={() => setSelectedItem(i)}>{i.title}</button>
+                  <span className="text-gray-500">{i.annualDate}</span>
+                </li>
+              ))}
+              {itemsWithAnnualDates.length === 0 && <li className="text-gray-500">None in view</li>}
+            </ul>
+          </div>
+
+          <div className={`${cardClasses} rounded p-3 border`}>
+            <h4 className="font-semibold mb-2 flex items-center gap-2">
+              <Calendar className="w-4 h-4" /> Cyclic deadlines
+            </h4>
+            <ul className="text-sm space-y-1">
+              {itemsWithCyclicDates.map(i => (
+                <li key={i.id} className="flex items-center justify-between">
+                  <button className="text-blue-600 hover:underline" onClick={() => setSelectedItem(i)}>{i.title}</button>
+                  <span className="text-gray-500">{i.cyclicDate}</span>
+                </li>
+              ))}
+              {itemsWithCyclicDates.length === 0 && <li className="text-gray-500">None in view</li>}
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const groupByCategory = (items) => {
+    return items.reduce((acc, cur) => {
+      acc[cur.category] = acc[cur.category] || [];
+      acc[cur.category].push(cur);
+      return acc;
+    }, {});
+  };
+
+  const ExportModal = () => {
+    if (!exportModalOpen) return null;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setExportModalOpen(false)}>
+        <div className={`${cardClasses} rounded-lg shadow-xl max-w-md w-full border`} onClick={(e) => e.stopPropagation()}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">Export data</h3>
+              <button onClick={() => setExportModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mb-3">
+              Export current compliance dataset, statuses, notes, attachments metadata, and reminders.
+            </p>
+            <div className="flex gap-3">
+              <button
+                className="inline-flex items-center gap-2 px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                onClick={exportCSV}
+              >
+                <Download className="w-4 h-4" />
+                CSV
+              </button>
+              <button
+                className="inline-flex items-center gap-2 px-3 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                onClick={exportJSON}
+              >
+                <Download className="w-4 h-4" />
+                JSON
+              </button>
+            </div>
+            <div className="mt-4 text-xs text-gray-400">
+              Tip: JSON keeps more detail (audit log, reminders, attachments).
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ImportModal = () => {
+    if (!importModalOpen) return null;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setImportModalOpen(false)}>
+        <div className={`${cardClasses} rounded-lg shadow-xl max-w-md w-full border`} onClick={(e) => e.stopPropagation()}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">Import data</h3>
+              <button onClick={() => setImportModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mb-3">
+              Import a previously exported JSON file to restore statuses, notes, reminders, and attachments metadata.
+            </p>
+            <label className="inline-flex items-center gap-2 px-3 py-2 rounded bg-amber-100 hover:bg-amber-200 cursor-pointer">
+              <Upload className="w-4 h-4" />
+              Choose JSON file
+              <input
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) importFromJSON(file);
+                }}
+              />
+            </label>
+            <div className="mt-4 text-xs text-gray-400">
+              Importing will overwrite current local data. This cannot be undone.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const AuditLogView = () => (
+    <div className={`${cardClasses} rounded-lg p-4 mb-6 border`}>
+      <h3 className="text-lg font-semibold mb-2">Audit log</h3>
+      <div className="text-xs text-gray-500 mb-2">Recent actions are recorded for traceability.</div>
+      <div className="max-h-[220px] overflow-auto border rounded p-2">
+        {auditLog.length === 0 && <div className="text-sm text-gray-500">No actions logged yet.</div>}
+        <ul className="text-sm">
+          {[...auditLog].reverse().slice(0, 50).map((log, idx) => (
+            <li key={idx} className="py-1 border-b">
+              <div className="flex items-center justify-between">
+                <div className="font-mono text-xs text-gray-500">{new Date(log.ts).toLocaleString()}</div>
+                <div className="text-xs text-gray-400">Item #{log.itemId}</div>
+              </div>
+              <div className="font-medium">{log.action}</div>
+              <div className="text-xs text-gray-600">{log.details}</div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+
+  const FooterTips = () => (
+    <div className={`${cardClasses} rounded-lg p-4 mb-6 border`}>
+      <div className="flex items-center gap-2 mb-2">
+        <HelpCircle className="w-4 h-4 text-gray-400" />
+        <h3 className="font-semibold">Tips for compliance tracking</h3>
+      </div>
+      <ul className="text-sm space-y-2">
+        <li>
+          <strong>Cycle mapping:</strong> Use Calendar view for annual items like budget, reports, and AGM; add reminders for September 30, March 31, and January 31.
+        </li>
+        <li>
+          <strong>Risk prioritization:</strong> Focus on Critical and High items first; mark In Progress and log notes for accountability.
+        </li>
+        <li>
+          <strong>Transparency:</strong> Document posting (Â§44) and public meetings (Â§54-55) require sufficient notice; attach proof in each item.
+        </li>
+        <li>
+          <strong>Oversight readiness:</strong> Keep audit-ready records for ministerial audits (Â§160-162) and MSGC fund audits (Â§163).
+        </li>
+        <li>
+          <strong>Land management:</strong> Enforce caps, subdivision approvals, and dower compliance consistently; add reminders per transfer event.
+        </li>
+      </ul>
+    </div>
+  );
+
+  return (
+    <div className={`min-h-screen ${themeClasses} p-6`} ref={printableRef}>
+      <div className="max-w-7xl mx-auto">
+        <Header />
+        <Controls />
+        <Legend />
+        {viewMode === 'dashboard' && <Dashboard />}
+        {viewMode === 'grid' && <ResultsGrid />}
+        {viewMode === 'table' && <ResultsTable />}
+        {viewMode === 'timeline' && <TimelineView />}
+        {viewMode === 'calendar' && <CalendarView />}
+        <AuditLogView />
+        <FooterTips />
+        <DetailModal />
+        <ExportModal />
+        <ImportModal />
+      </div>
+    </div>
+  );
+};
+
+export default ComplianceTrackerApp;
+```
+
+    // Mount the app
+    ReactDOM.createRoot(document.getElementById('root')).render(<ComplianceTrackerApp />);
+  </script>
+</body>
+</html>
